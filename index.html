@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badminton Master</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-dim: #b0b0b0;
+            --accent: #39ff14; /* เขียวสะท้อนแสง อ่านง่ายบนพื้นดำ */
+            --danger: #ff4d4d;
+            --border: #333333;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-bottom: 80px;
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #252525;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 12px;
+            text-align: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        /* Container & Cards */
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+
+        h2 { color: var(--accent); margin-top: 0; font-size: 1.5rem; }
+
+        /* Form Elements */
+        label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 14px; }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #2c2c2c;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-choice {
+            flex: 1;
+            padding: 15px;
+            background: #2c2c2c;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-choice.selected {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: black;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Stats Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: var(--accent); border-bottom: 1px solid var(--border); padding: 10px; font-size: 14px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #252525; font-size: 14px; }
+        .small-text { font-size: 11px; color: var(--text-dim); display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="page1" class="page active">
+            <h2>👥 สมาชิก</h2>
+            <div class="card">
+                <label>ชื่อสมาชิก</label>
+                <input type="text" id="mem_name" placeholder="ระบุชื่อ...">
+                <label>ระดับฝีมือ</label>
+                <select id="mem_class">
+                    <option value="S">Class S</option>
+                    <option value="A">Class A</option>
+                    <option value="B">Class B</option>
+                    <option value="C">Class C</option>
+                </select>
+                <button class="btn-main" onclick="registerMember()">เพิ่มรายชื่อ</button>
+            </div>
+        </div>
+
+        <div id="page2" class="page">
+            <h2>🏸 บันทึกผล</h2>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; gap: 20px;">
+                    <div style="flex: 1;">
+                        <label>Team A</label>
+                        <select class="p-select" id="p1a"></select>
+                        <select class="p-select" id="p2a"></select>
+                    </div>
+                    <div style="padding-top: 50px; color: var(--danger); font-weight: bold;">VS</div>
+                    <div style="flex: 1;">
+                        <label>Team B</label>
+                        <select class="p-select" id="p1b"></select>
+                        <select class="p-select" id="p2b"></select>
+                    </div>
+                </div>
+                <label>ผู้ชนะ</label>
+                <div class="btn-group">
+                    <button class="btn-choice" id="winA" onclick="setWin('Team A')">ทีม A</button>
+                    <button class="btn-choice" id="winB" onclick="setWin('Team B')">ทีม B</button>
+                </div>
+                <button class="btn-main" onclick="saveMatch()">บันทึกแมตช์</button>
+            </div>
+        </div>
+
+        <div id="page3" class="page">
+            <h2>📊 สถิติรวม</h2>
+            <div class="card" style="padding: 10px; overflow-x: auto;">
+                <table id="statsTable">
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th>ชนะ/รวม</th>
+                            <th>คู่หู/คู่แข่ง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page4" class="page">
+            <h2>🚪 กลับบ้าน</h2>
+            <div class="card">
+                <label>เลือกคนที่จะ Check-out</label>
+                <select id="out_name"></select>
+                <button class="btn-main" style="background: var(--danger); color: white;" onclick="checkOut()">บันทึกการกลับ</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showPage(1)">👥 สมาชิก</div>
+        <div class="nav-item" onclick="showPage(2); loadMembers();">🏸 แข่ง</div>
+        <div class="nav-item" onclick="showPage(3); loadStats();">📊 สถิติ</div>
+        <div class="nav-item" onclick="showPage(4); loadMembers();">🚪 กลับ</div>
+    </nav>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzVqzLH1vmiA38g0SBy3CRRfXIYw9Fb67U3X66yUyxk58x6IwfVLh1gXnPB7OSiLCeNMA/exec";
+        let winner = "";
+
+        function showPage(num) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page' + num).classList.add('active');
+            document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+        }
+
+        function setWin(team) {
+            winner = team;
+            document.getElementById('winA').className = team === 'Team A' ? 'btn-choice selected' : 'btn-choice';
+            document.getElementById('winB').className = team === 'Team B' ? 'btn-choice selected' : 'btn-choice';
+        }
+
+        // ฟังก์ชันดึงรายชื่อสมาชิกมาใส่ใน Dropdown
+        async function loadMembers() {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            const selects = document.querySelectorAll('.p-select, #out_name');
+            
+            selects.forEach(s => {
+                s.innerHTML = '<option value="">- เลือกชื่อ -</option>';
+                data.forEach(m => {
+                    // กรองเฉพาะคนที่ยังไม่กลับ (Status Active)
+                    if(m.Status !== "Checked Out") {
+                        s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`;
+                    }
+                });
+            });
+        }
+
+        // ฟังก์ชันดึงสถิติ
+        async function loadStats() {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            const body = document.getElementById('statsBody');
+            body.innerHTML = "กำลังโหลด...";
+            
+            let html = "";
+            data.forEach(m => {
+                html += `<tr>
+                    <td><b>${m.Name}</b><span class="small-text">${m.WinRate*100}%</span></td>
+                    <td>${m.Win}/${m.TotalPlayed}</td>
+                    <td><span class="small-text">🤝 ${m.AllPartners || '-'}</span>
+                        <span class="small-text">⚔️ ${m.AllOpponents || '-'}</span></td>
+                </tr>`;
+            });
+            body.innerHTML = html;
+        }
+
+        // ฟังก์ชันบันทึกแมตช์
+        async function saveMatch() {
+            const payload = {
+                teamA_p1: document.getElementById('p1a').value,
+                teamA_p2: document.getElementById('p2a').value,
+                teamB_p1: document.getElementById('p1b').value,
+                teamB_p2: document.getElementById('p2b').value,
+                winner: winner
+            };
+            if(!payload.winner || !payload.teamA_p1) return alert("กรอกข้อมูลไม่ครบ");
+            
+            alert("กำลังบันทึก...");
+            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            alert("สำเร็จ!");
+        }
+    </script>
+</body>
+</html>
