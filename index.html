@@ -115,7 +115,8 @@
 </nav>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4n-aOBtFaokAdC-zhGYc7j1O4GiB5F1sjT1df3uVnKdU5vIRFBEQWcJJEUuf1CRztmA/exec";
+    // *** สำคัญ: ตรวจสอบ URL นี้ให้เป็น URL ล่าสุดที่คุณ Deploy ***
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbD1kRA5jDrJJNr5nnqHIRcZzk9IjmHAXi9LqCl5urGyxM7HgxbviOYuUbnV9f-YEawA/exec";
     let selectedWinner = "";
 
     window.onload = loadMemberList;
@@ -135,14 +136,13 @@
 
     async function sendData(payload, btnId) {
         const btn = document.getElementById(btnId);
-        const originalText = btn.innerText;
         btn.disabled = true; btn.innerText = "กำลังบันทึก...";
         try {
-            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             alert("บันทึกสำเร็จ!");
             if(btnId === 'btn_reg') loadMemberList();
-        } catch (e) { alert("เกิดข้อผิดพลาด"); }
-        btn.disabled = false; btn.innerText = originalText;
+        } catch (e) { alert("Error: " + e); }
+        btn.disabled = false; btn.innerText = (btnId === 'btn_reg' ? "+ เพิ่มเข้าก๊วน" : "บันทึกข้อมูล");
     }
 
     async function loadMemberList() {
@@ -153,6 +153,7 @@
             data.reverse();
             let html = "";
             data.forEach(m => {
+                if(!m.Name) return;
                 const statusClass = m.Status === "Active" ? "active" : "";
                 html += `<tr>
                     <td><b>${m.Name}</b><span class="sub-text">${m.Note || ''}</span></td>
@@ -160,8 +161,8 @@
                     <td><span class="status-pill ${statusClass}">${m.Status}</span></td>
                 </tr>`;
             });
-            body.innerHTML = html || "<tr><td colspan="3">ยังไม่มีรายชื่อ</td></tr>";
-        } catch (e) { body.innerHTML = "<tr><td colspan="3">โหลดข้อมูลไม่สำเร็จ</td></tr>"; }
+            body.innerHTML = html || "<tr><td colspan='3'>ยังไม่มีรายชื่อ</td></tr>";
+        } catch (e) { body.innerHTML = "<tr><td colspan='3'>โหลดไม่สำเร็จ: " + e + "</td></tr>"; }
     }
 
     async function registerMember() {
@@ -190,13 +191,13 @@
 
     async function loadStats() {
         const body = document.getElementById('statsBody');
-        body.innerHTML = "<tr><td colspan="3">กำลังโหลด...</td></tr>";
+        body.innerHTML = "<tr><td colspan='3'>กำลังโหลด...</td></tr>";
         const res = await fetch(WEB_APP_URL);
         let data = await res.json();
-        data.reverse();
         let html = "";
         data.forEach(m => {
-            html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100).toFixed(0)}%</span></td><td>${m.Win}/${m.TotalPlayed}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
+            if(!m.Name) return;
+            html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100 || 0).toFixed(0)}%</span></td><td>${m.Win || 0}/${m.TotalPlayed || 0}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
         });
         body.innerHTML = html;
     }
