@@ -3,89 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Management</title>
+    <title>Badminton Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #1e2124;    /* เทาเข้มเกือบดำ */
-            --bg-card: #2f3136;    /* เทา Slate */
-            --text-main: #ffffff;
-            --text-dim: #b9bbbe;
-            --accent: #43b581;     /* เขียวสุขภาพดี ไม่แสบตา */
-            --danger: #f04747;
-            --border: #40444b;
+            --bg-body: #1e2124; --bg-card: #2f3136; --text-main: #ffffff;
+            --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b;
         }
-
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Kanit', sans-serif; /* แนะนำให้ใช้ font นี้ถ้ามี */
-            margin: 0;
-            padding-bottom: 90px;
-        }
-
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
         .container { padding: 20px; max-width: 450px; margin: auto; }
-        .page { display: none; animation: fadeIn 0.3s; }
+        .page { display: none; animation: fadeIn 0.2s; }
         .page.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         h2 { border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 20px; font-size: 1.4rem; }
-
-        .card {
-            background: var(--bg-card);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        /* Form Controls */
+        .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.9rem; }
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: #36393f;
-            border: 1px solid var(--border);
-            color: white;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        /* Match Style */
+        select, input { width: 100%; padding: 12px; margin-bottom: 15px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
         .vs-text { color: var(--danger); font-weight: bold; font-size: 1.2rem; }
-
-        /* Buttons */
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-choice {
-            flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border);
-            color: white; border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
+        .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; }
         .btn-choice.selected { border-color: var(--accent); background: rgba(67, 181, 129, 0.1); color: var(--accent); }
-
-        .btn-main {
-            width: 100%; padding: 15px; background: var(--accent); color: white;
-            border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer;
-        }
-        .btn-main:active { transform: scale(0.98); }
-
-        /* Table Style */
+        .btn-main { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .btn-main:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: var(--text-dim); border-bottom: 1px solid var(--border); padding: 10px; font-size: 0.8rem; }
         td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
         .sub-text { font-size: 0.75rem; color: var(--text-dim); display: block; margin-top: 2px; }
-
-        /* Navigation */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: #202225;
-            display: flex; border-top: 1px solid var(--border); padding: 10px 0;
-        }
-        .nav-item {
-            flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem;
-        }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
+        .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
     </style>
 </head>
@@ -93,68 +40,46 @@
 
 <div class="container">
     <div id="page1" class="page active">
-        <h2>👥 ลงทะเบียนสมาชิก</h2>
+        <h2>👥 สมาชิก</h2>
         <div class="card">
-            <label>ชื่อเล่น/ชื่อสมาชิก</label>
-            <input type="text" id="mem_name" placeholder="ระบุชื่อ...">
-            <label>ระดับฝีมือ</label>
+            <input type="text" id="mem_name" placeholder="ชื่อเล่น...">
             <select id="mem_class">
-                <option value="S">Class S (โหดมาก)</option>
-                <option value="A">Class A (มือโปร)</option>
-                <option value="B">Class B (ทั่วไป)</option>
-                <option value="C">Class C (มือใหม่)</option>
+                <option value="BB">BB</option><option value="BB+">BB+</option>
+                <option value="BG">BG</option><option value="BG+">BG+</option>
+                <option value="N">N</option><option value="N+">N+</option>
+                <option value="S">S</option><option value="S+">S+</option>
+                <option value="P">P</option>
             </select>
-            <button class="btn-main" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
+            <button class="btn-main" id="btn_reg" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
         </div>
     </div>
 
     <div id="page2" class="page">
-        <h2>🏸 บันทึกผลการแข่ง</h2>
+        <h2>🏸 บันทึกผล</h2>
         <div class="card">
             <div class="match-grid">
-                <div>
-                    <label>ทีม A</label>
-                    <select id="p1a" class="player-list"></select>
-                    <select id="p2a" class="player-list"></select>
-                </div>
+                <div><select id="p1a" class="player-list"></select><select id="p2a" class="player-list"></select></div>
                 <div class="vs-text">VS</div>
-                <div>
-                    <label>ทีม B</label>
-                    <select id="p1b" class="player-list"></select>
-                    <select id="p2b" class="player-list"></select>
-                </div>
+                <div><select id="p1b" class="player-list"></select><select id="p2b" class="player-list"></select></div>
             </div>
-            <label>ใครชนะ?</label>
             <div class="btn-group">
                 <button class="btn-choice" id="winA" onclick="setWin('Team A')">ทีม A ชนะ</button>
                 <button class="btn-choice" id="winB" onclick="setWin('Team B')">ทีม B ชนะ</button>
             </div>
-            <button class="btn-main" onclick="saveMatch()">บันทึกข้อมูล</button>
+            <button class="btn-main" id="btn_save" onclick="saveMatch()">บันทึกข้อมูล</button>
         </div>
     </div>
 
     <div id="page3" class="page">
-        <h2>📊 สรุปสถิติก๊วน</h2>
-        <div class="card table-wrapper">
-            <table id="statsTable">
-                <thead>
-                    <tr>
-                        <th>สมาชิก</th>
-                        <th>ชนะ/เล่น</th>
-                        <th>ประวัติ (คู่/แข่ง)</th>
-                    </tr>
-                </thead>
-                <tbody id="statsBody"></tbody>
-            </table>
-        </div>
+        <h2>📊 สถิติ</h2>
+        <div class="card table-wrapper"><table id="statsTable"><thead><tr><th>สมาชิก</th><th>ชนะ/เล่น</th><th>คู่/แข่ง</th></tr></thead><tbody id="statsBody"></tbody></table></div>
     </div>
 
     <div id="page4" class="page">
-        <h2>🚪 เช็คเอาท์ (กลับบ้าน)</h2>
+        <h2>🚪 กลับบ้าน</h2>
         <div class="card">
-            <label>ชื่อสมาชิกที่กลับแล้ว</label>
             <select id="out_name" class="player-list"></select>
-            <button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button>
+            <button class="btn-main" id="btn_out" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button>
         </div>
     </div>
 </div>
@@ -183,53 +108,43 @@
         document.getElementById('winB').className = team === 'Team B' ? 'btn-choice selected' : 'btn-choice';
     }
 
-    // 1. เพิ่มสมาชิก
+    async function sendData(payload, btnId) {
+        const btn = document.getElementById(btnId);
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "กำลังบันทึก...";
+        
+        try {
+            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            alert("สำเร็จแล้ว!");
+        } catch (e) { alert("เกิดข้อผิดพลาด"); }
+        
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+
     async function registerMember() {
         const name = document.getElementById('mem_name').value;
-        const mClass = document.getElementById('mem_class').value;
-        if (!name) return alert("กรุณาใส่ชื่อ");
-
-        const data = { type: "new_member", name: name, class: mClass };
-        await sendData(data, "เพิ่มสมาชิกเรียบร้อย!");
+        if (!name) return alert("ใส่ชื่อด้วยครับ");
+        await sendData({ type: "new_member", name: name, class: document.getElementById('mem_class').value }, "btn_reg");
         document.getElementById('mem_name').value = "";
     }
 
-    // 2. บันทึกแมตช์
     async function saveMatch() {
-        const data = {
-            teamA_p1: document.getElementById('p1a').value,
-            teamA_p2: document.getElementById('p2a').value,
-            teamB_p1: document.getElementById('p1b').value,
-            teamB_p2: document.getElementById('p2b').value,
-            winner: selectedWinner
-        };
+        const data = { teamA_p1: document.getElementById('p1a').value, teamA_p2: document.getElementById('p2a').value, teamB_p1: document.getElementById('p1b').value, teamB_p2: document.getElementById('p2b').value, winner: selectedWinner };
         if (!data.winner || !data.teamA_p1 || !data.teamB_p1) return alert("ข้อมูลไม่ครบ");
-        await sendData(data, "บันทึกแมตช์เรียบร้อย!");
+        await sendData(data, "btn_save");
     }
 
-    // ฟังก์ชันส่งข้อมูลเข้า Google Script
-    async function sendData(payload, successMsg) {
-        alert("กำลังประมวลผล...");
-        try {
-            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-            alert(successMsg);
-        } catch (e) { alert("Error: " + e); }
-    }
-
-    // ดึงชื่อมาใส่ Dropdown
     async function fetchDropdowns() {
         const res = await fetch(WEB_APP_URL);
         const data = await res.json();
-        const selects = document.querySelectorAll('.player-list');
-        selects.forEach(s => {
+        document.querySelectorAll('.player-list').forEach(s => {
             s.innerHTML = '<option value="">- เลือกชื่อ -</option>';
-            data.forEach(m => {
-                if(m.Status !== "Checked Out") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`;
-            });
+            data.forEach(m => { if(m.Status !== "Checked Out") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`; });
         });
     }
 
-    // ดึงสถิติมาโชว์หน้า 3
     async function loadStats() {
         const body = document.getElementById('statsBody');
         body.innerHTML = "<tr><td colspan='3'>กำลังโหลด...</td></tr>";
@@ -237,15 +152,10 @@
         const data = await res.json();
         let html = "";
         data.forEach(m => {
-            html += `<tr>
-                <td><b>${m.Name}</b><span class="sub-text">Class ${m.Class || '-'} | ${(m.WinRate*100).toFixed(0)}%</span></td>
-                <td>${m.Win}/${m.TotalPlayed}</td>
-                <td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td>
-            </tr>`;
+            html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100).toFixed(0)}%</span></td><td>${m.Win}/${m.TotalPlayed}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
         });
         body.innerHTML = html;
     }
 </script>
-
 </body>
 </html>
