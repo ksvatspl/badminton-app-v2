@@ -18,7 +18,7 @@
         h2 { border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 20px; font-size: 1.4rem; }
         .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.9rem; }
-        select, input { width: 100%; padding: 12px; margin-bottom: 15px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
         .vs-text { color: var(--danger); font-weight: bold; font-size: 1.2rem; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -29,7 +29,7 @@
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: var(--text-dim); border-bottom: 1px solid var(--border); padding: 10px; font-size: 0.8rem; }
-        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
         .sub-text { font-size: 0.75rem; color: var(--text-dim); display: block; margin-top: 2px; }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
@@ -42,9 +42,9 @@
 
 <div class="container">
     <div id="page1" class="page active">
-        <h2>👥 จัดการสมาชิก</h2>
+        <h2>👥 ลงทะเบียนเข้าก๊วน</h2>
         <div class="card">
-            <input type="text" id="mem_name" placeholder="ชื่อเล่น...">
+            <input type="text" id="mem_name" placeholder="ชื่อเล่น/ชื่อที่ใช้เรียก">
             <select id="mem_class">
                 <option value="BB">BB</option><option value="BB+">BB+</option>
                 <option value="BG">BG</option><option value="BG+">BG+</option>
@@ -52,6 +52,7 @@
                 <option value="S">S</option><option value="S+">S+</option>
                 <option value="P">P</option>
             </select>
+            <input type="text" id="mem_note" placeholder="หมายเหตุ (เช่น เบอร์โทร, สังกัด)">
             <button class="btn-main" id="btn_reg" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
         </div>
         
@@ -61,7 +62,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ชื่อ</th>
+                            <th>ชื่อ/โน้ต</th>
                             <th>ระดับ</th>
                             <th>สถานะ</th>
                         </tr>
@@ -114,7 +115,7 @@
 </nav>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyDZOKcTpfQjblAlpXhmvn_N3RVdL_elaVPgDmYbUrqMmqVWkrJyb76TfAcz16WOEeLPQ/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4n-aOBtFaokAdC-zhGYc7j1O4GiB5F1sjT1df3uVnKdU5vIRFBEQWcJJEUuf1CRztmA/exec";
     let selectedWinner = "";
 
     window.onload = loadMemberList;
@@ -136,13 +137,11 @@
         const btn = document.getElementById(btnId);
         const originalText = btn.innerText;
         btn.disabled = true; btn.innerText = "กำลังบันทึก...";
-        
         try {
             await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             alert("บันทึกสำเร็จ!");
             if(btnId === 'btn_reg') loadMemberList();
         } catch (e) { alert("เกิดข้อผิดพลาด"); }
-        
         btn.disabled = false; btn.innerText = originalText;
     }
 
@@ -151,25 +150,27 @@
         try {
             const res = await fetch(WEB_APP_URL);
             let data = await res.json();
-            data.reverse(); // เรียงจากใหม่ไปเก่า
+            data.reverse();
             let html = "";
             data.forEach(m => {
                 const statusClass = m.Status === "Active" ? "active" : "";
                 html += `<tr>
-                    <td><b>${m.Name}</b></td>
+                    <td><b>${m.Name}</b><span class="sub-text">${m.Note || ''}</span></td>
                     <td>${m.Class || '-'}</td>
                     <td><span class="status-pill ${statusClass}">${m.Status}</span></td>
                 </tr>`;
             });
-            body.innerHTML = html || "<tr><td colspan='3'>ยังไม่มีรายชื่อ</td></tr>";
-        } catch (e) { body.innerHTML = "<tr><td colspan='3'>โหลดข้อมูลไม่สำเร็จ</td></tr>"; }
+            body.innerHTML = html || "<tr><td colspan="3">ยังไม่มีรายชื่อ</td></tr>";
+        } catch (e) { body.innerHTML = "<tr><td colspan="3">โหลดข้อมูลไม่สำเร็จ</td></tr>"; }
     }
 
     async function registerMember() {
         const name = document.getElementById('mem_name').value;
+        const note = document.getElementById('mem_note').value;
         if (!name) return alert("ใส่ชื่อด้วยครับ");
-        await sendData({ type: "new_member", name: name, class: document.getElementById('mem_class').value }, "btn_reg");
+        await sendData({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: note }, "btn_reg");
         document.getElementById('mem_name').value = "";
+        document.getElementById('mem_note').value = "";
     }
 
     async function saveMatch() {
@@ -189,10 +190,10 @@
 
     async function loadStats() {
         const body = document.getElementById('statsBody');
-        body.innerHTML = "<tr><td colspan='3'>กำลังโหลด...</td></tr>";
+        body.innerHTML = "<tr><td colspan="3">กำลังโหลด...</td></tr>";
         const res = await fetch(WEB_APP_URL);
         let data = await res.json();
-        data.reverse(); // เรียงตามลำดับการบันทึก (ล่าสุดอยู่บน)
+        data.reverse();
         let html = "";
         data.forEach(m => {
             html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100).toFixed(0)}%</span></td><td>${m.Win}/${m.TotalPlayed}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
