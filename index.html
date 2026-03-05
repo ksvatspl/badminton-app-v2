@@ -34,13 +34,15 @@
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
+        .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; background: #444; color: var(--text-dim); }
+        .status-pill.active { background: rgba(67, 181, 129, 0.2); color: var(--accent); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="page1" class="page active">
-        <h2>👥 สมาชิก</h2>
+        <h2>👥 จัดการสมาชิก</h2>
         <div class="card">
             <input type="text" id="mem_name" placeholder="ชื่อเล่น...">
             <select id="mem_class">
@@ -51,6 +53,24 @@
                 <option value="P">P</option>
             </select>
             <button class="btn-main" id="btn_reg" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
+        </div>
+        
+        <div class="card" style="padding: 10px;">
+            <h3 style="font-size: 1rem; padding: 10px 10px 0 10px; color: var(--text-dim);">รายชื่อสมาชิกล่าสุด</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th>ระดับ</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberListBody">
+                        <tr><td colspan="3" style="text-align:center;">กำลังโหลดรายชื่อ...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -71,8 +91,10 @@
     </div>
 
     <div id="page3" class="page">
-        <h2>📊 สถิติ</h2>
-        <div class="card table-wrapper"><table id="statsTable"><thead><tr><th>สมาชิก</th><th>ชนะ/เล่น</th><th>คู่/แข่ง</th></tr></thead><tbody id="statsBody"></tbody></table></div>
+        <h2>📊 สถิติรวม</h2>
+        <div class="card table-wrapper">
+            <table><thead><tr><th>สมาชิก</th><th>ชนะ/เล่น</th><th>คู่/แข่ง</th></tr></thead><tbody id="statsBody"></tbody></table>
+        </div>
     </div>
 
     <div id="page4" class="page">
@@ -85,7 +107,7 @@
 </div>
 
 <nav class="bottom-nav">
-    <div class="nav-item active" onclick="showPage(1)">ลงชื่อ</div>
+    <div class="nav-item active" onclick="showPage(1); loadMemberList();">ลงชื่อ</div>
     <div class="nav-item" onclick="showPage(2); fetchDropdowns();">จดผล</div>
     <div class="nav-item" onclick="showPage(3); loadStats();">สถิติ</div>
     <div class="nav-item" onclick="showPage(4); fetchDropdowns();">กลับบ้าน</div>
@@ -94,6 +116,8 @@
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyDZOKcTpfQjblAlpXhmvn_N3RVdL_elaVPgDmYbUrqMmqVWkrJyb76TfAcz16WOEeLPQ/exec";
     let selectedWinner = "";
+
+    window.onload = loadMemberList;
 
     function showPage(num) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -111,16 +135,34 @@
     async function sendData(payload, btnId) {
         const btn = document.getElementById(btnId);
         const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "กำลังบันทึก...";
+        btn.disabled = true; btn.innerText = "กำลังบันทึก...";
         
         try {
             await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-            alert("สำเร็จแล้ว!");
+            alert("บันทึกสำเร็จ!");
+            if(btnId === 'btn_reg') loadMemberList();
         } catch (e) { alert("เกิดข้อผิดพลาด"); }
         
-        btn.disabled = false;
-        btn.innerText = originalText;
+        btn.disabled = false; btn.innerText = originalText;
+    }
+
+    async function loadMemberList() {
+        const body = document.getElementById('memberListBody');
+        try {
+            const res = await fetch(WEB_APP_URL);
+            let data = await res.json();
+            data.reverse(); // เรียงจากใหม่ไปเก่า
+            let html = "";
+            data.forEach(m => {
+                const statusClass = m.Status === "Active" ? "active" : "";
+                html += `<tr>
+                    <td><b>${m.Name}</b></td>
+                    <td>${m.Class || '-'}</td>
+                    <td><span class="status-pill ${statusClass}">${m.Status}</span></td>
+                </tr>`;
+            });
+            body.innerHTML = html || "<tr><td colspan='3'>ยังไม่มีรายชื่อ</td></tr>";
+        } catch (e) { body.innerHTML = "<tr><td colspan='3'>โหลดข้อมูลไม่สำเร็จ</td></tr>"; }
     }
 
     async function registerMember() {
@@ -141,7 +183,7 @@
         const data = await res.json();
         document.querySelectorAll('.player-list').forEach(s => {
             s.innerHTML = '<option value="">- เลือกชื่อ -</option>';
-            data.forEach(m => { if(m.Status !== "Checked Out") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`; });
+            data.forEach(m => { if(m.Status === "Active") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`; });
         });
     }
 
@@ -149,7 +191,8 @@
         const body = document.getElementById('statsBody');
         body.innerHTML = "<tr><td colspan='3'>กำลังโหลด...</td></tr>";
         const res = await fetch(WEB_APP_URL);
-        const data = await res.json();
+        let data = await res.json();
+        data.reverse(); // เรียงตามลำดับการบันทึก (ล่าสุดอยู่บน)
         let html = "";
         data.forEach(m => {
             html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100).toFixed(0)}%</span></td><td>${m.Win}/${m.TotalPlayed}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
