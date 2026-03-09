@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Hub Pro (Fixed Version)</title>
+    <title>Badminton Hub Pro (Stable Version)</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,6 +14,7 @@
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
         
+        /* --- Sticky Header --- */
         .page-header {
             position: sticky; top: 0; background-color: var(--bg-body); z-index: 100;
             padding: 15px; margin: 0; border-bottom: 1px solid var(--border);
@@ -46,6 +47,22 @@
         .btn-mini { background: #5865f2; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; margin-left: auto; }
         .btn-edit { background: var(--warning); color: #000; width: 100%; padding: 8px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; display: none; cursor: pointer; font-size: 0.85rem; }
 
+        /* --- Fix ปุ่มเลือกทีมชนะ --- */
+        .btn-group { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn-choice { 
+            flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); 
+            color: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; 
+            opacity: 1 !important; /* ป้องกันสีจางเมื่อ disabled */
+        }
+        .btn-choice.selected { 
+            border-color: var(--accent) !important; 
+            background: rgba(67, 181, 129, 0.2) !important; 
+            color: var(--accent) !important; 
+            font-weight: bold; 
+        }
+        .btn-choice:disabled:not(.selected) { opacity: 0.4 !important; }
+
+        /* --- ปุ่มสถานะในตาราง --- */
         .btn-status { border: none; border-radius: 6px; padding: 6px 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; margin: auto; }
         .btn-out { background: rgba(240, 71, 71, 0.15); color: var(--danger); border: 1px solid var(--danger); }
         .btn-in { background: rgba(67, 181, 129, 0.15); color: var(--accent); border: 1px solid var(--accent); }
@@ -55,7 +72,7 @@
 
         .stats-wrapper { background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
         .stats-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .stats-table thead { background: #36393f; position: sticky; top: 0; z-index: 10; }
+        .stats-table thead { background: #36393f; position: sticky; top: var(--header-height); z-index: 10; }
         .stats-table th { padding: 12px 5px; text-align: center; color: var(--text-dim); border-bottom: 2px solid var(--border); background: #36393f; }
         .stats-table td { padding: 12px 5px; border-bottom: 1px solid var(--border); text-align: center; }
         .stats-table td:first-child { text-align: left; font-weight: 600; padding-left: 10px; }
@@ -176,12 +193,13 @@
         loadData();
     }
 
+    // --- Fix Bug Dropdown ในหน้าจดผล ---
     function updateDropdowns() {
         const activeMembers = allDataMemory.filter(m => m.Status === "Active");
         let options = '<option value="">- เลือก -</option>';
         activeMembers.forEach(m => { options += `<option value="${m.Name}">${m.Name} [${m.Class}]</option>`; });
         
-        // แก้ Bug: เลือกเฉพาะ select ใน matchContainer เท่านั้น ไม่ให้ทับ select หน้าลงชื่อ
+        // เลือกเฉพาะ select ใน matchContainer เท่านั้น
         document.querySelectorAll('#matchContainer .p-select').forEach(s => { 
             if(!s.disabled) { 
                 const cur = s.value; s.innerHTML = options; s.value = cur; 
@@ -190,6 +208,7 @@
         });
     }
 
+    // --- เพิ่มสมาชิกและ Reset Form ---
     async function registerMember() {
         const nameInput = document.getElementById('mem_name');
         const classInput = document.getElementById('mem_class');
@@ -210,7 +229,7 @@
             }) 
         });
 
-        // แก้ Bug: ล้างข้อมูลหลังบันทึก
+        // Reset ข้อมูล
         nameInput.value = ""; 
         noteInput.value = ""; 
         classInput.selectedIndex = 0;
@@ -220,6 +239,7 @@
         loadData();
     }
 
+    // --- ตารางสถิติและ One-Tap Update ---
     function renderStatsTable() {
         const body = document.getElementById('fullStatsBody');
         const stats = allDataMemory.filter(i => i.TotalPlayed !== undefined);
@@ -240,11 +260,12 @@
     }
 
     async function quickStatusUpdate(name, action) {
-        if(!confirm(`ยืนยันการเปลี่ยนสถานะของ ${name}?`)) return;
+        if(!confirm(`ยืนยันเปลี่ยนสถานะ: ${name}?`)) return;
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: action, name: name }) });
         loadData();
     }
 
+    // --- ประวัติการแข่งขัน (แสดงสีปุ่มชนะให้ชัด) ---
     function renderMatchHistory() {
         const container = document.getElementById('matchContainer');
         const historyData = allDataMemory.filter(item => item.Type === "MatchHistory");
@@ -264,8 +285,12 @@
                 });
                 const btnGroup = b.querySelector('.btn-group');
                 btnGroup.dataset.winner = m.Winner;
-                const winBtn = Array.from(btnGroup.querySelectorAll('.btn-choice')).find(btn => (m.Winner === 'Team A' && btn.innerText.includes('A')) || (m.Winner === 'Team B' && btn.innerText.includes('B')));
+                const winBtn = Array.from(btnGroup.querySelectorAll('.btn-choice')).find(btn => 
+                    (m.Winner === 'Team A' && btn.innerText.includes('A')) || 
+                    (m.Winner === 'Team B' && btn.innerText.includes('B'))
+                );
                 if(winBtn) winBtn.classList.add('selected');
+                
                 const btnSave = b.querySelector('.btn-main');
                 btnSave.innerText = "บันทึกแล้ว (ประวัติ)"; btnSave.classList.add('saved'); btnSave.disabled = true;
                 b.querySelector('.btn-edit').style.display = 'block';
