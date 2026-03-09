@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Hub Pro (Sticky Header)</title>
+    <title>Badminton Hub Pro (One-Tap Status)</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,54 +14,42 @@
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
         
-        /* --- Sticky Header Logic --- */
         .page-header {
-            position: sticky;
-            top: 0;
-            background-color: var(--bg-body);
-            z-index: 100;
-            padding: 15px;
-            margin: 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: var(--header-height);
-            box-sizing: border-box;
+            position: sticky; top: 0; background-color: var(--bg-body); z-index: 100;
+            padding: 15px; margin: 0; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            height: var(--header-height); box-sizing: border-box;
         }
         .page-header h2 {
-            border-left: 4px solid var(--accent);
-            padding-left: 10px;
-            margin: 0;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
+            border-left: 4px solid var(--accent); padding-left: 10px; margin: 0;
+            font-size: 1.1rem; display: flex; align-items: center; gap: 10px; width: 100%;
         }
 
-        .container { padding: 15px; max-width: 600px; margin: auto; }
+        .container { padding: 10px; max-width: 600px; margin: auto; }
         .page { display: none; animation: fadeIn 0.15s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .card { background: var(--bg-card); border-radius: 15px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
-        .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
+        .card { background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
+        .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; }
         
-        .txt-p { color: var(--cls-p) !important; font-weight: bold; } 
-        .txt-s { color: var(--cls-s) !important; font-weight: bold; } 
-        .txt-n { color: var(--cls-n) !important; font-weight: bold; }
-        .txt-bg { color: var(--cls-bg) !important; font-weight: bold; } 
-        .txt-bb { color: var(--cls-bb) !important; font-weight: bold; }
+        .txt-p { color: var(--cls-p) !important; } .txt-s { color: var(--cls-s) !important; } 
+        .txt-n { color: var(--cls-n) !important; } .txt-bg { color: var(--cls-bg) !important; } 
+        .txt-bb { color: var(--cls-bb) !important; }
 
-        select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .p-select { margin-bottom: 10px; border-left: 5px solid transparent; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 10px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .p-select { margin-bottom: 8px; border-left: 5px solid transparent; }
         
         .btn-main { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-main:disabled { background: #4f545c; cursor: not-allowed; }
         .btn-main.saved { background: #4f545c; opacity: 0.8; }
         .btn-mini { background: #5865f2; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; margin-left: auto; }
         .btn-edit { background: var(--warning); color: #000; width: 100%; padding: 8px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; display: none; cursor: pointer; font-size: 0.85rem; }
+
+        /* Status Table Button */
+        .btn-status { border: none; border-radius: 6px; padding: 6px 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; margin: auto; }
+        .btn-out { background: rgba(240, 71, 71, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-in { background: rgba(67, 181, 129, 0.15); color: var(--accent); border: 1px solid var(--accent); }
 
         .btn-group { display: flex; gap: 8px; margin-bottom: 15px; }
         .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
@@ -71,16 +59,16 @@
         .vs-text { color: var(--danger); font-weight: bold; font-size: 1.1rem; text-align: center; }
 
         .stats-wrapper { background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
-        .stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         .stats-table thead { background: #36393f; position: sticky; top: 0; z-index: 10; }
-        .stats-table th { padding: 12px 8px; text-align: center; color: var(--text-dim); border-bottom: 2px solid var(--border); background: #36393f; }
-        .stats-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); text-align: center; }
-        .stats-table td:first-child { text-align: left; font-weight: 600; padding-left: 15px; }
+        .stats-table th { padding: 12px 5px; text-align: center; color: var(--text-dim); border-bottom: 2px solid var(--border); background: #36393f; }
+        .stats-table td { padding: 12px 5px; border-bottom: 1px solid var(--border); text-align: center; }
+        .stats-table td:first-child { text-align: left; font-weight: 600; padding-left: 10px; }
         
-        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+        .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; }
         .dot-active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
         .dot-off { background: var(--danger); }
-        .pct-badge { background: #40444b; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .pct-badge { background: #40444b; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 200; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.85rem; }
@@ -103,7 +91,7 @@
 
 <div id="page1" class="page active">
     <div class="page-header">
-        <h2>👥 สมาชิกเข้าก๊วน <span id="loading-indicator" style="font-size:0.7rem; display:none; color:var(--warning);">ซิงค์ข้อมูล...</span></h2>
+        <h2>👥 สมาชิกเข้าก๊วน <span id="loading-indicator" style="font-size:0.7rem; display:none; color:var(--warning);">ซิงค์...</span></h2>
     </div>
     <div class="container">
         <div class="card">
@@ -122,7 +110,7 @@
 
 <div id="page2" class="page">
     <div class="page-header">
-        <h2>🏸 บันทึกผล <button class="btn-mini" onclick="openStats()">📊 สถิติย่อ</button></h2>
+        <h2>🏸 บันทึกผล <button class="btn-mini" onclick="openStats()">📊 ย่อ</button></h2>
     </div>
     <div class="container">
         <div id="matchContainer"></div>
@@ -132,19 +120,20 @@
 
 <div id="page3" class="page">
     <div class="page-header">
-        <h2>🚪 สถานะ & สถิติ</h2>
+        <h2>🚪 จัดการ & สถิติรวม</h2>
     </div>
-    <div class="container">
-        <div class="card">
-            <select id="status_name" onchange="applyColor(this)" style="margin-bottom: 10px;"></select>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-main" style="background: var(--danger); flex: 1;" onclick="updateStatus('checkout')">🔴 กลับบ้าน</button>
-                <button class="btn-main" style="background: var(--warning); color: #000; flex: 1;" onclick="updateStatus('undo')">🟢 เล่นต่อ</button>
-            </div>
-        </div>
+    <div class="container" style="padding: 5px;">
         <div class="stats-wrapper">
             <table class="stats-table">
-                <thead><tr><th>ชื่อ</th><th>ระดับ</th><th>เล่น</th><th>ชนะ/แพ้</th><th>%</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">ชื่อ</th>
+                        <th style="width: 15%;">คลาส</th>
+                        <th style="width: 15%;">เล่น</th>
+                        <th style="width: 20%;">W/L (%)</th>
+                        <th style="width: 25%;">จัดการ</th>
+                    </tr>
+                </thead>
                 <tbody id="fullStatsBody"></tbody>
             </table>
         </div>
@@ -158,7 +147,6 @@
 </nav>
 
 <script>
-    // ใช้ URL เดิมของคุณ
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyj7QLBQVJVa-5zOVl-3nuWTClpMCIxnKTwaC7YhYX1TzVcDLLRzK2AqimWD4Vpa3awvw/exec";
     let allDataMemory = [];
     let gameCount = 0;
@@ -189,17 +177,55 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('page' + num).classList.add('active');
         document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-        window.scrollTo(0, 0); // รีเซ็ตตำแหน่งหน้าจอเมื่อเปลี่ยนหน้า
+        window.scrollTo(0, 0);
         loadData();
     }
 
+    // --- ส่วนจัดการสถิติ (เวอร์ชันใหม่) ---
+    function renderStatsTable() {
+        const body = document.getElementById('fullStatsBody');
+        const stats = allDataMemory.filter(i => i.TotalPlayed !== undefined);
+        let sorted = stats.sort((a, b) => b.TotalPlayed - a.TotalPlayed);
+        
+        let html = "";
+        sorted.forEach(m => {
+            if(!m.Name) return;
+            const isActive = m.Status === "Active";
+            const btnText = isActive ? "🚪 ออก" : "🏸 เข้า";
+            const btnClass = isActive ? "btn-out" : "btn-in";
+            const actionType = isActive ? "checkout" : "undo";
+
+            html += `<tr>
+                <td><span class="status-dot ${isActive ? "dot-active" : "dot-off"}"></span>${m.Name}</td>
+                <td class="${getTxtClass(m.Class)}">${m.Class}</td>
+                <td style="font-weight:bold;">${m.TotalPlayed}</td>
+                <td><span style="color:var(--accent);">${m.Win}</span>/<span style="color:var(--danger);">${m.Loss}</span><br><span class="pct-badge">${(m.WinRate * 100 || 0).toFixed(0)}%</span></td>
+                <td>
+                    <button class="btn-status ${btnClass}" onclick="quickStatusUpdate('${m.Name}', '${actionType}')">
+                        ${btnText}
+                    </button>
+                </td>
+            </tr>`;
+        });
+        body.innerHTML = html || "<tr><td colspan='5'>กำลังโหลดข้อมูล...</td></tr>";
+    }
+
+    async function quickStatusUpdate(name, action) {
+        const msg = action === "checkout" ? `คุณกำลังจะเช็คเอาท์ "${name}" ใช่หรือไม่?` : `คุณต้องการให้ "${name}" กลับมาเล่นต่อ?`;
+        if(!confirm(msg)) return;
+
+        // เปลี่ยน UI หลอกๆ ก่อนเพื่อให้รู้สึกเร็ว (Optimistic UI)
+        loadData(); // แต่จริงๆ เราจะยิงจริงข้างล่าง
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: action, name: name }) });
+        loadData();
+    }
+
+    // --- ส่วนจดผลและจัดการชื่อ (เหมือนเดิมที่เสถียรอยู่แล้ว) ---
     function renderMatchHistory() {
         const container = document.getElementById('matchContainer');
         const historyData = allDataMemory.filter(item => item.Type === "MatchHistory");
-        
         if (historyData.length > 0 && !isHistoryLoaded) {
-            container.innerHTML = "";
-            gameCount = 0;
+            container.innerHTML = ""; gameCount = 0;
             historyData.forEach((m) => {
                 gameCount++;
                 const box = createMatchElement(gameCount);
@@ -208,42 +234,26 @@
                 const selects = b.querySelectorAll('.p-select');
                 [m.P1A, m.P2A, m.P1B, m.P2B].forEach((name, i) => {
                     if(name) {
-                        const opt = document.createElement('option');
-                        opt.value = name; opt.text = name;
+                        const opt = document.createElement('option'); opt.value = name; opt.text = name;
                         selects[i].add(opt); selects[i].value = name;
                     }
                 });
                 const btnGroup = b.querySelector('.btn-group');
                 btnGroup.dataset.winner = m.Winner;
-                const winBtn = Array.from(btnGroup.querySelectorAll('.btn-choice')).find(btn => 
-                    (m.Winner === 'Team A' && btn.innerText.includes('A')) || (m.Winner === 'Team B' && btn.innerText.includes('B'))
-                );
+                const winBtn = Array.from(btnGroup.querySelectorAll('.btn-choice')).find(btn => (m.Winner === 'Team A' && btn.innerText.includes('A')) || (m.Winner === 'Team B' && btn.innerText.includes('B')));
                 if(winBtn) winBtn.classList.add('selected');
                 const btnSave = b.querySelector('.btn-main');
-                btnSave.innerText = "บันทึกแล้ว (History)";
-                btnSave.classList.add('saved'); btnSave.disabled = true;
+                btnSave.innerText = "บันทึกแล้ว (ประวัติ)"; btnSave.classList.add('saved'); btnSave.disabled = true;
                 b.querySelector('.btn-edit').style.display = 'block';
                 b.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
             });
-            isHistoryLoaded = true;
-            addNewMatchBox();
-        } else if (gameCount === 0) {
-            addNewMatchBox();
-        }
+            isHistoryLoaded = true; addNewMatchBox();
+        } else if (gameCount === 0) { addNewMatchBox(); }
     }
 
     function createMatchElement(id) {
         const div = document.createElement('div'); div.className = 'card'; div.id = `match-box-${id}`;
-        div.innerHTML = `
-            <div class="game-label">เกมที่ ${id}</div>
-            <div class="match-grid">
-                <div><select class="p-select" onchange="applyColor(this)" data-role="p1a"></select><select class="p-select" onchange="applyColor(this)" data-role="p2a"></select></div>
-                <div class="vs-text">VS</div>
-                <div><select class="p-select" onchange="applyColor(this)" data-role="p1b"></select><select class="p-select" onchange="applyColor(this)" data-role="p2b"></select></div>
-            </div>
-            <div class="btn-group"><button class="btn-choice" onclick="setBoxWin(this, 'Team A')">ทีม A ชนะ</button><button class="btn-choice" onclick="setBoxWin(this, 'Team B')">ทีม B ชนะ</button></div>
-            <button class="btn-main" onclick="saveMatchBox(${id})">บันทึกผลแข่ง</button>
-            <button class="btn-edit" onclick="editMatchBox(${id})">✎ แก้ไขข้อมูล</button>`;
+        div.innerHTML = `<div class="game-label">เกมที่ ${id}</div><div class="match-grid"><div><select class="p-select" onchange="applyColor(this)" data-role="p1a"></select><select class="p-select" onchange="applyColor(this)" data-role="p2a"></select></div><div class="vs-text">VS</div><div><select class="p-select" onchange="applyColor(this)" data-role="p1b"></select><select class="p-select" onchange="applyColor(this)" data-role="p2b"></select></div></div><div class="btn-group"><button class="btn-choice" onclick="setBoxWin(this, 'Team A')">A ชนะ</button><button class="btn-choice" onclick="setBoxWin(this, 'Team B')">B ชนะ</button></div><button class="btn-main" onclick="saveMatchBox(${id})">บันทึกผล</button><button class="btn-edit" onclick="editMatchBox(${id})">✎ แก้ไข</button>`;
         return div;
     }
 
@@ -257,17 +267,9 @@
 
     function updateDropdowns() {
         const activeMembers = allDataMemory.filter(m => m.Status === "Active");
-        let options = '<option value="">- เลือกผู้เล่น -</option>';
+        let options = '<option value="">- เลือก -</option>';
         activeMembers.forEach(m => { options += `<option value="${m.Name}">${m.Name} [${m.Class}]</option>`; });
-        document.querySelectorAll('.p-select').forEach(s => { 
-            if(!s.disabled) { const cur = s.value; s.innerHTML = options; s.value = cur; if(cur) applyColor(s); } 
-        });
-        const statusSelect = document.getElementById('status_name');
-        if(statusSelect) {
-            let allOptions = '<option value="">- เลือกชื่อ -</option>';
-            allDataMemory.forEach(m => { if(m.Name) allOptions += `<option value="${m.Name}">${m.Name} [${m.Class}] (${m.Status})</option>`; });
-            statusSelect.innerHTML = allOptions;
-        }
+        document.querySelectorAll('.p-select').forEach(s => { if(!s.disabled) { const cur = s.value; s.innerHTML = options; s.value = cur; if(cur) applyColor(s); } });
     }
 
     function getTxtClass(cls) {
@@ -293,12 +295,12 @@
         const box = document.getElementById(`match-box-${id}`);
         const winner = box.querySelector('.btn-group').dataset.winner;
         const p1a = box.querySelector('[data-role="p1a"]').value;
-        if (!winner || !p1a) return alert("โปรดเลือกผู้เล่นและทีมชนะ!");
+        if (!winner || !p1a) return alert("เลือกข้อมูลให้ครบ!");
         const btn = box.querySelector('.btn-main');
-        btn.disabled = true; btn.innerText = "⏳ บันทึก...";
+        btn.disabled = true; btn.innerText = "⏳...";
         const data = { teamA_p1: p1a, teamA_p2: box.querySelector('[data-role="p2a"]').value, teamB_p1: box.querySelector('[data-role="p1b"]').value, teamB_p2: box.querySelector('[data-role="p2b"]').value, winner: winner };
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        btn.innerText = "บันทึกสำเร็จ ✓"; btn.classList.add('saved');
+        btn.innerText = "✓ สำเร็จ"; btn.classList.add('saved');
         box.querySelector('.btn-edit').style.display = 'block';
         box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
         loadData();
@@ -306,7 +308,7 @@
 
     function editMatchBox(id) {
         const box = document.getElementById(`match-box-${id}`);
-        box.querySelector('.btn-main').disabled = false; box.querySelector('.btn-main').innerText = "บันทึกผลแข่ง";
+        box.querySelector('.btn-main').disabled = false; box.querySelector('.btn-main').innerText = "บันทึกผล";
         box.querySelector('.btn-main').classList.remove('saved'); box.querySelector('.btn-edit').style.display = 'none';
         box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
     }
@@ -330,32 +332,13 @@
         }
     }
 
-    function renderStatsTable() {
-        const body = document.getElementById('fullStatsBody');
-        const stats = allDataMemory.filter(i => i.TotalPlayed !== undefined);
-        let sorted = stats.sort((a, b) => b.TotalPlayed - a.TotalPlayed);
-        let html = "";
-        sorted.forEach(m => {
-            if(!m.Name) return;
-            html += `<tr><td><span class="status-dot ${m.Status === "Active" ? "dot-active" : "dot-off"}"></span>${m.Name}</td><td class="${getTxtClass(m.Class)}">${m.Class}</td><td style="font-weight:bold;">${m.TotalPlayed}</td><td><span style="color:var(--accent);">${m.Win}</span>/<span style="color:var(--danger);">${m.Loss}</span></td><td><span class="pct-badge">${(m.WinRate * 100 || 0).toFixed(0)}%</span></td></tr>`;
-        });
-        body.innerHTML = html || "<tr><td colspan='5'>กำลังโหลด...</td></tr>";
-    }
-
     async function registerMember() {
         const nameInput = document.getElementById('mem_name');
-        if(!nameInput.value) return alert("ระบุชื่อเล่น!");
+        if(!nameInput.value) return alert("ใส่ชื่อ!");
         const btn = document.getElementById('btn-reg');
         btn.disabled = true; btn.innerText = "⏳...";
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "new_member", name: nameInput.value, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value }) });
         nameInput.value = ""; btn.disabled = false; btn.innerText = "+ เพิ่มชื่อสมาชิก";
-        loadData();
-    }
-
-    async function updateStatus(action) {
-        const name = document.getElementById('status_name').value;
-        if (!name) return alert("เลือกชื่อ!");
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: action, name: name }) });
         loadData();
     }
 
