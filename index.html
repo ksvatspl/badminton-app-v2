@@ -9,7 +9,7 @@
         :root {
             --bg-body: #1e2124; --bg-card: #2f3136; --text-main: #ffffff;
             --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b; --warning: #faa61a;
-            /* Class Font Colors */
+            /* Class Colors */
             --cls-p: #ff66b2; --cls-s: #ff4d4d; --cls-n: #ffaa00; --cls-bg: #33ccff; --cls-bb: #44ffaa;
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
@@ -22,16 +22,19 @@
         .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
         .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
         
-        /* Class Color Logic */
-        .txt-p { color: var(--cls-p); font-weight: bold; }
-        .txt-s { color: var(--cls-s); font-weight: bold; }
-        .txt-n { color: var(--cls-n); font-weight: bold; }
-        .txt-bg { color: var(--cls-bg); font-weight: bold; }
-        .txt-bb { color: var(--cls-bb); font-weight: bold; }
+        /* Class Font Colors */
+        .txt-p { color: var(--cls-p) !important; font-weight: bold; }
+        .txt-s { color: var(--cls-s) !important; font-weight: bold; }
+        .txt-n { color: var(--cls-n) !important; font-weight: bold; }
+        .txt-bg { color: var(--cls-bg) !important; font-weight: bold; }
+        .txt-bb { color: var(--cls-bb) !important; font-weight: bold; }
 
-        select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        select:disabled { opacity: 0.6; background: #202225; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 8px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        select:focus { border-color: var(--accent); outline: none; }
         
+        /* สไตล์พิเศษสำหรับ Dropdown ที่เลือกแล้ว */
+        .p-select { margin-bottom: 12px; border-left: 5px solid transparent; }
+
         .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 15px; }
         .vs-text { color: var(--danger); font-weight: bold; font-size: 1.2rem; text-align: center; }
         
@@ -41,18 +44,14 @@
         
         .btn-main { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
         .btn-main.saved { background: #4f545c; }
-        .btn-edit { background: var(--warning); margin-top: 10px; padding: 8px; font-size: 0.8rem; }
-        .btn-add-match { background: transparent; border: 2px dashed var(--border); color: var(--text-dim); margin-top: 10px; }
         
         /* Modal สถิติย่อ */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
-        .modal-content { background: var(--bg-card); margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 420px; max-height: 80vh; overflow-y: auto; box-sizing: border-box; }
-        .stat-header { display: grid; grid-template-columns: 2fr 0.8fr 1.5fr; padding-bottom: 10px; border-bottom: 2px solid var(--border); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; }
+        .modal-content { background: var(--bg-card); margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 420px; max-height: 80vh; overflow-y: auto; }
         .stat-row { display: grid; grid-template-columns: 2fr 0.8fr 1.5fr; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .stat-total { font-size: 1.2rem; font-weight: 600; color: #fff; text-align: center; }
-        .close-btn { float: right; font-size: 28px; cursor: pointer; color: var(--text-dim); }
-        .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer; font-weight: 600; }
-
+        .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer; }
+        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
@@ -62,13 +61,8 @@
 
 <div id="statsModal" class="modal">
     <div class="modal-content">
-        <span class="close-btn" onclick="closeStats()">&times;</span>
-        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติเรียงตามเกมที่เล่น</h3>
-        <div class="stat-header">
-            <div>ชื่อ</div>
-            <div style="text-align:center;">ระดับ</div>
-            <div style="text-align:right;">เกม [ช/พ]</div>
-        </div>
+        <span onclick="closeStats()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติ (เรียงตามเกมเล่นมากที่สุด)</h3>
         <div id="miniStatsList"></div>
     </div>
 </div>
@@ -78,33 +72,31 @@
         <h2>👥 ลงทะเบียนเข้าก๊วน</h2>
         <div class="card">
             <input type="text" id="mem_name" placeholder="ชื่อเล่น">
-            <select id="mem_class" onchange="this.className = getTxtClass(this.value)">
-                <option value="BB" class="txt-bb">BB</option><option value="BB+" class="txt-bb">BB+</option>
-                <option value="BG" class="txt-bg">BG</option><option value="BG+" class="txt-bg">BG+</option>
-                <option value="N" class="txt-n">N</option><option value="N+" class="txt-n">N+</option>
-                <option value="S" class="txt-s">S</option><option value="S+" class="txt-s">S+</option>
-                <option value="P" class="txt-p">P</option>
+            <select id="mem_class" onchange="applyColor(this)">
+                <option value="BB">BB</option><option value="BB+">BB+</option>
+                <option value="BG">BG</option><option value="BG+">BG+</option>
+                <option value="N">N</option><option value="N+">N+</option>
+                <option value="S">S</option><option value="S+">S+</option>
+                <option value="P">P</option>
             </select>
             <input type="text" id="mem_note" placeholder="หมายเหตุ">
             <button class="btn-main" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
         </div>
         <div class="card" style="padding: 10px;">
-            <table style="width:100%; border-collapse:collapse;">
-                <tbody id="memberListBody"></tbody>
-            </table>
+            <table style="width:100%; border-collapse:collapse;" id="memberListBody"></table>
         </div>
     </div>
 
     <div id="page2" class="page">
         <h2>🏸 จดผลการแข่ง <button class="btn-peek" onclick="openStats()">📊 สถิติย่อ</button></h2>
         <div id="matchContainer"></div>
-        <button class="btn-main btn-add-match" onclick="addNewMatchBox(true)">+ เพิ่มเกมถัดไป</button>
+        <button class="btn-main" style="background:transparent; border:2px dashed var(--border); color:var(--text-dim);" onclick="addNewMatchBox(true)">+ เพิ่มเกมถัดไป</button>
     </div>
 
     <div id="page3" class="page"><h2>📊 สถิติรวม</h2><div id="fullStatsList"></div></div>
     <div id="page4" class="page">
         <h2>🚪 เช็กเอาท์</h2>
-        <div class="card"><select id="out_name" class="player-list"></select><button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button></div>
+        <div class="card"><select id="out_name" class="player-list" onchange="applyColor(this)"></select><button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button></div>
     </div>
 </div>
 
@@ -130,40 +122,48 @@
         if(num === 2) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
+    // ฟังก์ชันช่วยจัดการสีฟอนต์ตามระดับ
     function getTxtClass(cls) {
         if(!cls) return "";
-        let type = 'bb';
-        if(cls.includes('P')) type = 'p';
-        else if(cls.includes('S')) type = 's';
-        else if(cls.includes('N')) type = 'n';
-        else if(cls.includes('BG')) type = 'bg';
-        return `txt-${type}`;
+        if(cls.includes('P')) return "txt-p";
+        if(cls.includes('S')) return "txt-s";
+        if(cls.includes('N')) return "txt-n";
+        if(cls.includes('BG')) return "txt-bg";
+        return "txt-bb";
     }
 
-    // --- MINI STATS (Sorted by TotalPlayed) ---
-    function openStats() {
-        document.getElementById('statsModal').style.display = "block";
-        renderMiniStats();
+    // ฟังก์ชันเปลี่ยนสี Dropdown เมื่อเลือก
+    function applyColor(el) {
+        el.className = ""; // clear
+        const val = el.options[el.selectedIndex].text;
+        const clsMatch = val.match(/\[(.*?)\]/);
+        const cls = clsMatch ? clsMatch[1] : el.value;
+        el.classList.add(getTxtClass(cls));
+        
+        // สำหรับหน้าจดผล เพิ่มเส้นสีด้านซ้าย
+        if(el.classList.contains('p-select')) {
+            const colorCode = getComputedStyle(document.documentElement).getPropertyValue('--cls-' + getTxtClass(cls).split('-')[1]);
+            el.style.borderLeftColor = colorCode;
+        }
     }
+
+    // --- MINI STATS ---
+    function openStats() { document.getElementById('statsModal').style.display = "block"; renderMiniStats(); }
     function closeStats() { document.getElementById('statsModal').style.display = "none"; }
 
     function renderMiniStats() {
         const list = document.getElementById('miniStatsList');
-        // เรียงลำดับตามเกมที่เล่นมากไปน้อย
         let sorted = [...allDataMemory].sort((a, b) => (b.TotalPlayed || 0) - (a.TotalPlayed || 0));
         let html = "";
         sorted.forEach(m => {
             if(!m.Name) return;
             html += `<div class="stat-row">
-                <div class="stat-name">${m.Name}</div>
-                <div style="text-align:center;" class="${getTxtClass(m.Class)}">${m.Class}</div>
-                <div style="text-align:right;">
-                    <span class="stat-total">${m.TotalPlayed}</span> 
-                    <span style="color:var(--text-dim); font-size:0.75rem;">[${m.Win}/${m.Loss}]</span>
-                </div>
+                <div style="font-weight:500;">${m.Name}</div>
+                <div class="${getTxtClass(m.Class)}" style="text-align:center;">${m.Class}</div>
+                <div style="text-align:right;"><span class="stat-total">${m.TotalPlayed}</span> <small style="color:var(--text-dim)">[${m.Win}/${m.Loss}]</small></div>
             </div>`;
         });
-        list.innerHTML = html || "ไม่มีข้อมูล";
+        list.innerHTML = html;
     }
 
     // --- MATCH LOGIC ---
@@ -183,13 +183,13 @@
             <div class="game-label">เกมที่ ${gameCount}</div>
             <div class="match-grid">
                 <div>
-                    <select class="p-select" data-role="p1a">${getMemberOptions()}</select>
-                    <select class="p-select" data-role="p2a">${getMemberOptions()}</select>
+                    <select class="p-select" onchange="applyColor(this)" data-role="p1a">${getMemberOptions()}</select>
+                    <select class="p-select" onchange="applyColor(this)" data-role="p2a">${getMemberOptions()}</select>
                 </div>
                 <div class="vs-text">VS</div>
                 <div>
-                    <select class="p-select" data-role="p1b">${getMemberOptions()}</select>
-                    <select class="p-select" data-role="p2b">${getMemberOptions()}</select>
+                    <select class="p-select" onchange="applyColor(this)" data-role="p1b">${getMemberOptions()}</select>
+                    <select class="p-select" onchange="applyColor(this)" data-role="p2b">${getMemberOptions()}</select>
                 </div>
             </div>
             <div class="btn-group">
@@ -197,17 +197,18 @@
                 <button class="btn-choice" onclick="setBoxWin(this, 'Team B')">ทีม B ชนะ</button>
             </div>
             <button class="btn-main" onclick="saveMatchBox(${gameCount})">บันทึกข้อมูล</button>
-            <button class="btn-main btn-edit" style="display:none;" onclick="editMatchBox(${gameCount})">✎ แก้ไข</button>
+            <button class="btn-main" style="background:var(--warning); margin-top:10px; font-size:0.8rem; display:none;" onclick="editMatchBox(${gameCount})">✎ แก้ไข</button>
         `;
         container.appendChild(box);
         if(shouldScroll) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
-    // Dropdown แสดงระดับหลังชื่อ
     function getMemberOptions() {
         let options = '<option value="">- เลือกผู้เล่น -</option>';
         allDataMemory.filter(m => m.Status === "Active").forEach(m => {
-            options += `<option value="${m.Name}">${m.Name} &nbsp;&nbsp;&nbsp; [${m.Class}]</option>`;
+            // ใช้ Space และขีดกลางเพื่อแยกชื่อกับระดับให้ชัดเจนที่สุด
+            const padding = " — "; 
+            options += `<option value="${m.Name}">${m.Name}${padding}[${m.Class}]</option>`;
         });
         return options;
     }
@@ -222,16 +223,20 @@
     async function saveMatchBox(id) {
         const box = document.getElementById(`match-box-${id}`);
         const winner = box.querySelector('.btn-group').dataset.winner;
-        const p1a = box.querySelector('[data-role="p1a"]').value;
-        const p1b = box.querySelector('[data-role="p1b"]').value;
-        if (!winner || !p1a || !p1b) return alert("ข้อมูลไม่ครบ!");
-        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
+        if (!winner || !box.querySelector('[data-role="p1a"]').value) return alert("ข้อมูลไม่ครบ!");
+        const btnSave = box.querySelector('.btn-main');
         btnSave.disabled = true; btnSave.innerText = "กำลังบันทึก...";
-        const data = { teamA_p1: p1a, teamA_p2: box.querySelector('[data-role="p2a"]').value, teamB_p1: p1b, teamB_p2: box.querySelector('[data-role="p2b"]').value, winner: winner };
+        const data = { 
+            teamA_p1: box.querySelector('[data-role="p1a"]').value, 
+            teamA_p2: box.querySelector('[data-role="p2a"]').value, 
+            teamB_p1: box.querySelector('[data-role="p1b"]').value, 
+            teamB_p2: box.querySelector('[data-role="p2b"]').value, 
+            winner: winner 
+        };
         try {
             await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
             btnSave.innerText = "บันทึกแล้ว ✓"; btnSave.classList.add('saved');
-            box.querySelector('.btn-edit').style.display = 'block';
+            box.querySelector('button[onclick*="edit"]').style.display = 'block';
             box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
             const res = await fetch(WEB_APP_URL);
             allDataMemory = await res.json();
@@ -240,13 +245,12 @@
 
     function editMatchBox(id) {
         const box = document.getElementById(`match-box-${id}`);
-        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
+        const btnSave = box.querySelector('.btn-main');
         btnSave.classList.remove('saved'); btnSave.innerText = "บันทึกข้อมูล"; btnSave.disabled = false;
-        box.querySelector('.btn-edit').style.display = 'none';
+        box.querySelector('button[onclick*="edit"]').style.display = 'none';
         box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
     }
 
-    // --- OTHER PAGES ---
     async function loadMemberList() {
         const body = document.getElementById('memberListBody');
         const res = await fetch(WEB_APP_URL);
@@ -295,7 +299,7 @@
         const select = document.getElementById('out_name');
         select.innerHTML = '<option value="">- เลือกชื่อ -</option>';
         allDataMemory.filter(m => m.Status === "Active").forEach(m => {
-            select.innerHTML += `<option value="${m.Name}">${m.Name} [${m.Class}]</option>`;
+            select.innerHTML += `<option value="${m.Name}">${m.Name} — [${m.Class}]</option>`;
         });
     }
 </script>
