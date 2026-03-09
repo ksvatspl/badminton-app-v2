@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Hub Pro (Stable Version)</title>
+    <title>Badminton Hub Pro (Stable + Mini Stats)</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -63,9 +63,22 @@
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.85rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
+
+        /* Modal Styles สำหรับสถิติย่อ */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
+        .modal-content { background: var(--bg-card); margin: 10% auto; padding: 20px; border-radius: 15px; width: 85%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
+        .modal-row { display: grid; grid-template-columns: 1fr 60px 80px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
     </style>
 </head>
 <body>
+
+<div id="statsModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeStats()" style="float:right; cursor:pointer; font-size:24px; color:var(--text-dim);">&times;</span>
+        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติย่อ (เรียงตามเกม)</h3>
+        <div id="miniStatsList"></div>
+    </div>
+</div>
 
 <div class="container">
     <div id="page1" class="page active">
@@ -90,7 +103,7 @@
     </div>
 
     <div id="page2" class="page">
-        <h2>🏸 บันทึกผลแข่ง</h2>
+        <h2>🏸 บันทึกผลแข่ง <button class="btn-mini" onclick="openStats()">📊 ย่อ</button></h2>
         <div id="matchContainer"></div>
         <button class="btn-main" style="background:transparent; border:2px dashed var(--border); color:var(--text-dim);" onclick="addNewMatchBox(true)">+ เพิ่มเกมถัดไป</button>
     </div>
@@ -193,7 +206,6 @@
         if (allDataMemory.length === 0) {
             html = `<tr><td style="padding:15px; text-align:center;">ยังไม่มีสมาชิกในก๊วน</td></tr>`;
         } else {
-            // แสดงข้อมูลย้อนกลับ (คนลงชื่อล่าสุดอยู่บน)
             allDataMemory.slice().reverse().forEach(m => {
                 if(!m.Name) return;
                 html += `
@@ -229,7 +241,7 @@
         btn.disabled = false;
         btn.innerText = "+ เพิ่มชื่อ";
         
-        loadData(); // โหลดข้อมูลใหม่มายืนยันว่าบันทึกติดแล้ว
+        loadData();
     }
 
     // --- หน้า 2: จดผล (มีปุ่มแก้ไข) ---
@@ -260,7 +272,7 @@
             <button class="btn-edit" onclick="editMatchBox(${gameCount})">✎ แก้ไข / เปลี่ยนตัว</button>
         `;
         container.appendChild(box);
-        updateDropdowns(); // ใส่รายชื่อลงไปในกล่องใหม่
+        updateDropdowns(); 
         if(shouldScroll) window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
@@ -287,16 +299,14 @@
             winner: winner 
         };
 
-        // รอจนกว่าจะส่งเสร็จ
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
         
-        // เมื่อเสร็จแล้ว ปรับหน้าตา
         btnSave.innerText = "บันทึกสำเร็จ ✓"; 
         btnSave.classList.add('saved');
-        box.querySelector('.btn-edit').style.display = 'block'; // โชว์ปุ่มแก้ไข
-        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true); // ล็อคปุ่ม
+        box.querySelector('.btn-edit').style.display = 'block'; 
+        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true); 
         
-        loadData(); // อัปเดตสถิติทันที
+        loadData(); 
     }
 
     function editMatchBox(id) {
@@ -305,8 +315,8 @@
         btnSave.disabled = false;
         btnSave.innerText = "บันทึกผลใหม่";
         btnSave.classList.remove('saved');
-        box.querySelector('.btn-edit').style.display = 'none'; // ซ่อนปุ่มแก้ไข
-        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false); // ปลดล็อค
+        box.querySelector('.btn-edit').style.display = 'none'; 
+        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false); 
     }
 
     function updateDropdowns() {
@@ -314,17 +324,15 @@
         let options = '<option value="">- เลือก -</option>';
         activeMembers.forEach(m => { options += `<option value="${m.Name}">${m.Name} — [${m.Class}]</option>`; });
         
-        // อัปเดต Dropdown ในหน้าจดผล (เฉพาะกล่องที่ยังไม่โดนล็อค)
         document.querySelectorAll('.p-select').forEach(s => { 
             const val = s.value; 
             if(!s.disabled) { 
                 s.innerHTML = options; 
                 s.value = val; 
-                applyColor(s); // ทาเกล็ดสีใหม่
+                applyColor(s); 
             } 
         });
         
-        // อัปเดต Dropdown ในหน้าสถานะ
         const statusSelect = document.getElementById('status_name');
         let allOptions = '<option value="">- เลือกชื่อผู้เล่น -</option>';
         allDataMemory.forEach(m => { if(m.Name) allOptions += `<option value="${m.Name}">${m.Name} — [${m.Class}] (${m.Status})</option>`; });
@@ -358,13 +366,37 @@
         const name = document.getElementById('status_name').value;
         if (!name) return alert("โปรดเลือกชื่อผู้เล่นก่อนครับ");
         
-        // แสดงสถานะว่ากำลังโหลด
         document.getElementById('loading-indicator').style.display = 'inline-block';
-
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: action, name: name }) });
         
-        loadData(); // อัปเดตตารางสถานะใหม่
+        loadData(); 
         alert("อัปเดตสถานะเรียบร้อย!");
+    }
+
+    // --- ฟังก์ชันสำหรับ Modal สถิติย่อ ---
+    function openStats() { 
+        document.getElementById('statsModal').style.display = "block"; 
+        renderMiniStats(); 
+    }
+    
+    function closeStats() { 
+        document.getElementById('statsModal').style.display = "none"; 
+    }
+    
+    function renderMiniStats() {
+        let sorted = [...allDataMemory].sort((a, b) => (b.TotalPlayed || 0) - (a.TotalPlayed || 0));
+        let html = "";
+        sorted.forEach(m => { 
+            if(m.Name) {
+                html += `
+                <div class="modal-row">
+                    <div style="font-weight:bold;">${m.Name}</div>
+                    <div class="${getTxtClass(m.Class)}" style="text-align:center;">${m.Class}</div>
+                    <div style="text-align:right;"><b>${m.TotalPlayed}</b> <span style="font-size:0.7rem; color:var(--text-dim);">เกม</span></div>
+                </div>`;
+            }
+        });
+        document.getElementById('miniStatsList').innerHTML = html || "ยังไม่มีข้อมูล";
     }
 
     // โหลดข้อมูลครั้งแรกเมื่อเปิดหน้าเว็บ
