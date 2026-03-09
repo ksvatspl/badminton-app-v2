@@ -9,7 +9,7 @@
         :root {
             --bg-body: #1e2124; --bg-card: #2f3136; --text-main: #ffffff;
             --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b; --warning: #faa61a;
-            /* Class Colors */
+            /* Class Font Colors */
             --cls-p: #ff66b2; --cls-s: #ff4d4d; --cls-n: #ffaa00; --cls-bg: #33ccff; --cls-bb: #44ffaa;
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
@@ -22,17 +22,15 @@
         .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
         .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
         
-        /* Class Font Colors */
+        /* Class Color Logic */
         .txt-p { color: var(--cls-p) !important; font-weight: bold; }
         .txt-s { color: var(--cls-s) !important; font-weight: bold; }
         .txt-n { color: var(--cls-n) !important; font-weight: bold; }
         .txt-bg { color: var(--cls-bg) !important; font-weight: bold; }
         .txt-bb { color: var(--cls-bb) !important; font-weight: bold; }
 
-        select, input { width: 100%; padding: 12px; margin-bottom: 8px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
         select:focus { border-color: var(--accent); outline: none; }
-        
-        /* สไตล์พิเศษสำหรับ Dropdown ที่เลือกแล้ว */
         .p-select { margin-bottom: 12px; border-left: 5px solid transparent; }
 
         .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 15px; }
@@ -52,8 +50,18 @@
         .stat-total { font-size: 1.2rem; font-weight: 600; color: #fff; text-align: center; }
         .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer; }
         
+        /* สไตล์ตารางสถิติ */
+        .stats-table-container { background: var(--bg-card); border-radius: 12px; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 380px; }
+        .stats-table th { background: #36393f; padding: 12px 8px; text-align: left; color: var(--text-dim); font-weight: 500; border-bottom: 2px solid var(--border); white-space: nowrap; }
+        .stats-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .stats-table tr:last-child td { border-bottom: none; }
+        .win-text { color: var(--accent); font-weight: bold; }
+        .loss-text { color: var(--danger); font-weight: bold; }
+        .wr-badge { background: rgba(67, 181, 129, 0.15); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
-        .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
+        .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.85rem; padding: 5px 0; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
     </style>
 </head>
@@ -61,8 +69,8 @@
 
 <div id="statsModal" class="modal">
     <div class="modal-content">
-        <span onclick="closeStats()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติ (เรียงตามเกมเล่นมากที่สุด)</h3>
+        <span onclick="closeStats()" style="float:right; cursor:pointer; font-size:24px; color:var(--text-dim);">&times;</span>
+        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติเรียงตามจำนวนเกม</h3>
         <div id="miniStatsList"></div>
     </div>
 </div>
@@ -93,18 +101,25 @@
         <button class="btn-main" style="background:transparent; border:2px dashed var(--border); color:var(--text-dim);" onclick="addNewMatchBox(true)">+ เพิ่มเกมถัดไป</button>
     </div>
 
-    <div id="page3" class="page"><h2>📊 สถิติรวม</h2><div id="fullStatsList"></div></div>
-    <div id="page4" class="page">
-        <h2>🚪 เช็กเอาท์</h2>
-        <div class="card"><select id="out_name" class="player-list" onchange="applyColor(this)"></select><button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button></div>
+    <div id="page3" class="page">
+        <h2>🚪 จัดการสถานะ</h2>
+        <div class="card">
+            <select id="status_name" class="player-list" onchange="applyColor(this)"></select>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-main" style="background: var(--danger); flex: 1;" onclick="updateStatus('checkout')">🔴 กลับบ้าน</button>
+                <button class="btn-main" style="background: var(--warning); color: #000; flex: 1;" onclick="updateStatus('undo')">🟢 ยกเลิก (เล่นต่อ)</button>
+            </div>
+        </div>
+
+        <h2>📊 สถิติรวม</h2>
+        <div id="fullStatsList"></div>
     </div>
 </div>
 
 <nav class="bottom-nav">
     <div class="nav-item active" onclick="showPage(1); loadMemberList();">ลงชื่อ</div>
     <div class="nav-item" onclick="showPage(2); initMatchPage();">จดผล</div>
-    <div class="nav-item" onclick="showPage(3); loadStats();">สถิติ</div>
-    <div class="nav-item" onclick="showPage(4); fetchDropdowns();">กลับบ้าน</div>
+    <div class="nav-item" onclick="showPage(3); loadStatsAndDropdown();">สถิติ</div>
 </nav>
 
 <script>
@@ -122,7 +137,6 @@
         if(num === 2) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
-    // ฟังก์ชันช่วยจัดการสีฟอนต์ตามระดับ
     function getTxtClass(cls) {
         if(!cls) return "";
         if(cls.includes('P')) return "txt-p";
@@ -132,15 +146,15 @@
         return "txt-bb";
     }
 
-    // ฟังก์ชันเปลี่ยนสี Dropdown เมื่อเลือก
     function applyColor(el) {
-        el.className = ""; // clear
+        el.className = "player-list"; // Reset 
+        if(el.classList.contains('p-select')) el.className = "p-select";
+        
         const val = el.options[el.selectedIndex].text;
         const clsMatch = val.match(/\[(.*?)\]/);
         const cls = clsMatch ? clsMatch[1] : el.value;
         el.classList.add(getTxtClass(cls));
         
-        // สำหรับหน้าจดผล เพิ่มเส้นสีด้านซ้าย
         if(el.classList.contains('p-select')) {
             const colorCode = getComputedStyle(document.documentElement).getPropertyValue('--cls-' + getTxtClass(cls).split('-')[1]);
             el.style.borderLeftColor = colorCode;
@@ -206,9 +220,7 @@
     function getMemberOptions() {
         let options = '<option value="">- เลือกผู้เล่น -</option>';
         allDataMemory.filter(m => m.Status === "Active").forEach(m => {
-            // ใช้ Space และขีดกลางเพื่อแยกชื่อกับระดับให้ชัดเจนที่สุด
-            const padding = " — "; 
-            options += `<option value="${m.Name}">${m.Name}${padding}[${m.Class}]</option>`;
+            options += `<option value="${m.Name}">${m.Name} — [${m.Class}]</option>`;
         });
         return options;
     }
@@ -227,10 +239,8 @@
         const btnSave = box.querySelector('.btn-main');
         btnSave.disabled = true; btnSave.innerText = "กำลังบันทึก...";
         const data = { 
-            teamA_p1: box.querySelector('[data-role="p1a"]').value, 
-            teamA_p2: box.querySelector('[data-role="p2a"]').value, 
-            teamB_p1: box.querySelector('[data-role="p1b"]').value, 
-            teamB_p2: box.querySelector('[data-role="p2b"]').value, 
+            teamA_p1: box.querySelector('[data-role="p1a"]').value, teamA_p2: box.querySelector('[data-role="p2a"]').value, 
+            teamB_p1: box.querySelector('[data-role="p1b"]').value, teamB_p2: box.querySelector('[data-role="p2b"]').value, 
             winner: winner 
         };
         try {
@@ -251,6 +261,7 @@
         box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
     }
 
+    // --- OTHER PAGES ---
     async function loadMemberList() {
         const body = document.getElementById('memberListBody');
         const res = await fetch(WEB_APP_URL);
@@ -261,7 +272,7 @@
             html += `<tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:12px 5px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
                 <td style="text-align:center;" class="${getTxtClass(m.Class)}">${m.Class}</td>
-                <td style="text-align:right;"><small style="color:${m.Status === 'Active' ? 'var(--accent)' : 'var(--text-dim)'}">${m.Status}</small></td>
+                <td style="text-align:right;"><small style="color:${m.Status === 'Active' ? 'var(--accent)' : 'var(--danger)'}">${m.Status}</small></td>
             </tr>`;
         });
         body.innerHTML = html;
@@ -274,33 +285,78 @@
         alert("สำเร็จ!"); location.reload(); 
     }
 
-    async function loadStats() {
+    // --- สถิติ & จัดการสถานะ ---
+    async function loadStatsAndDropdown() {
         const container = document.getElementById('fullStatsList');
-        container.innerHTML = "กำลังโหลด...";
+        container.innerHTML = "<div style='text-align:center; padding:20px;'>กำลังโหลดข้อมูล...</div>";
+        
         const res = await fetch(WEB_APP_URL);
         allDataMemory = await res.json();
-        let html = "";
+        
+        // 1. อัปเดต Dropdown เลือกชื่อ (โชว์สถานะด้วย จะได้รู้ว่าใครกลับไปแล้ว)
+        const select = document.getElementById('status_name');
+        select.innerHTML = '<option value="">- เลือกชื่อผู้เล่น -</option>';
         allDataMemory.forEach(m => {
-            if(!m.Name) return;
-            html += `<div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span><b>${m.Name}</b> <span class="${getTxtClass(m.Class)}">[${m.Class}]</span></span>
-                    <span style="color:var(--accent); font-weight:bold;">${(m.WinRate*100 || 0).toFixed(0)}%</span>
-                </div>
-                <div class="sub-text" style="margin-top:10px; color:#fff; font-size:0.9rem;">เล่น ${m.TotalPlayed} | ชนะ ${m.Win} | แพ้ ${m.Loss}</div>
-            </div>`;
+            if(m.Name) select.innerHTML += `<option value="${m.Name}">${m.Name} — [${m.Class}] (${m.Status})</option>`;
         });
+
+        // 2. แสดงตารางสถิติ (เรียงตาม TotalPlayed มากไปน้อย)
+        let sorted = [...allDataMemory].sort((a, b) => (b.TotalPlayed || 0) - (a.TotalPlayed || 0));
+        let html = `
+            <div class="stats-table-container">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th style="text-align:center;">ระดับ</th>
+                            <th style="text-align:center;">เล่น</th>
+                            <th style="text-align:center;">ช/พ</th>
+                            <th style="text-align:right;">% ชนะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        sorted.forEach(m => {
+            if(!m.Name) return;
+            const winRatePercent = (m.WinRate * 100 || 0).toFixed(0);
+            html += `
+                <tr>
+                    <td><b>${m.Name}</b></td>
+                    <td style="text-align:center;" class="${getTxtClass(m.Class)}">${m.Class}</td>
+                    <td style="text-align:center; font-weight:bold;">${m.TotalPlayed}</td>
+                    <td style="text-align:center;"><span class="win-text">${m.Win}</span>/<span class="loss-text">${m.Loss}</span></td>
+                    <td style="text-align:right;"><span class="wr-badge">${winRatePercent}%</span></td>
+                </tr>
+            `;
+        });
+        html += `</tbody></table></div>`;
         container.innerHTML = html;
     }
 
-    async function fetchDropdowns() {
-        const res = await fetch(WEB_APP_URL);
-        allDataMemory = await res.json();
-        const select = document.getElementById('out_name');
-        select.innerHTML = '<option value="">- เลือกชื่อ -</option>';
-        allDataMemory.filter(m => m.Status === "Active").forEach(m => {
-            select.innerHTML += `<option value="${m.Name}">${m.Name} — [${m.Class}]</option>`;
-        });
+    async function updateStatus(action) {
+        const select = document.getElementById('status_name');
+        const name = select.value;
+        if (!name) return alert("กรุณาเลือกชื่อผู้เล่น");
+        
+        // ปุ่มที่ถูกกด
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "กำลังบันทึก...";
+        btn.disabled = true;
+
+        // หมายเหตุ: ฝั่ง Google Apps Script ต้องรับค่า type เป็น "checkout" และ "undo_checkout" ด้วยนะครับ
+        const payload = { type: action, name: name };
+        
+        try {
+            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("อัปเดตสถานะเรียบร้อย!");
+            await loadStatsAndDropdown(); // รีโหลดข้อมูลตารางและ Dropdown ใหม่
+        } catch (e) {
+            alert("เกิดข้อผิดพลาดในการบันทึก");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     }
 </script>
 </body>
