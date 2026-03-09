@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Hub Pro v2</title>
+    <title>Badminton Hub Pro v2.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -34,20 +34,16 @@
         .vs-text { color: var(--danger); font-weight: bold; font-size: 1.1rem; text-align: center; }
         
         .btn-group { display: flex; gap: 8px; margin-bottom: 15px; }
-        .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
         .btn-choice.selected { border-color: var(--accent); background: rgba(67, 181, 129, 0.1); color: var(--accent); font-weight: bold; }
         
         .btn-mini { background: #5865f2; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; cursor: pointer; }
 
-        .btn-main { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-main:disabled { background: #4f545c; cursor: not-allowed; opacity: 0.7; }
+        .btn-main { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-main:disabled { background: #4f545c; cursor: not-allowed; }
         .btn-main.saved { background: #4f545c; }
         
-        .stats-table-container { background: var(--bg-card); border-radius: 12px; overflow-x: auto; }
-        .stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 420px; }
-        .stats-table th { background: #36393f; padding: 12px 6px; text-align: center; color: var(--text-dim); border-bottom: 2px solid var(--border); }
-        .stats-table td { padding: 12px 6px; border-bottom: 1px solid var(--border); text-align: center; }
-        .stats-table td:first-child { text-align: left; padding-left: 10px; }
+        .btn-edit { background: var(--warning); color: #000; width: 100%; padding: 8px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; display: none; cursor: pointer; font-size: 0.85rem; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.85rem; }
@@ -64,14 +60,14 @@
 <div id="statsModal" class="modal">
     <div class="modal-content">
         <span onclick="closeStats()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติปัจจุบัน</h3>
-        <div id="miniStatsList">กำลังโหลด...</div>
+        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติย่อ</h3>
+        <div id="miniStatsList"></div>
     </div>
 </div>
 
 <div class="container">
     <div id="page1" class="page active">
-        <h2>👥 ลงทะเบียน <span id="sync-status" style="font-size:0.7rem; font-weight:normal; color:var(--accent);">● ออนไลน์</span></h2>
+        <h2>👥 ลงทะเบียนเข้าก๊วน</h2>
         <div class="card">
             <input type="text" id="mem_name" placeholder="ชื่อเล่น">
             <select id="mem_class" onchange="applyColor(this)">
@@ -102,7 +98,6 @@
                 <button class="btn-main" style="background: var(--warning); color: #000; flex: 1;" onclick="updateStatus('undo')">🟢 เล่นต่อ</button>
             </div>
         </div>
-        <h2>📊 สถิติรวม</h2>
         <div id="fullStatsList"></div>
     </div>
 </div>
@@ -117,18 +112,11 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyZJ_p8IYOsWlGQl8gVtIsKr81--2OO0g9h1oMr2_2sYwlYe6xxeyTUa8xq2glAReIDFg/exec";
     let gameCount = 0;
     let allDataMemory = []; 
-    let isFetching = false;
 
-    // --- Core Sync Logic (เพิ่มความเร็ว) ---
     async function loadAllData() {
-        if(isFetching) return;
-        isFetching = true;
-        try {
-            const res = await fetch(WEB_APP_URL);
-            allDataMemory = await res.json();
-            renderAllParts(); // อัปเดตทุกจุดที่ใช้ข้อมูล
-        } catch(e) { console.log("Sync Error"); }
-        isFetching = false;
+        const res = await fetch(WEB_APP_URL);
+        allDataMemory = await res.json();
+        renderAllParts();
     }
 
     function renderAllParts() {
@@ -142,15 +130,10 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('page' + num).classList.add('active');
         document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-        
-        // ถ้าเปิดหน้าจดผลครั้งแรก ให้สร้างกล่องรอไว้
         if(num === 2 && gameCount === 0) addNewMatchBox();
-        
-        // แอบโหลดข้อมูลใหม่เบื้องหลังทุกครั้งที่สลับหน้า
         loadAllData();
     }
 
-    // --- Helper UI ---
     function getTxtClass(cls) {
         if(!cls) return "";
         if(cls.includes('P')) return "txt-p";
@@ -172,55 +155,7 @@
         }
     }
 
-    // --- Page 1: Member ---
-    function renderMemberList() {
-        let html = "";
-        allDataMemory.slice().reverse().forEach(m => {
-            if(!m.Name) return;
-            html += `<tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
-                <td class="${getTxtClass(m.Class)}" style="text-align:center;">${m.Class}</td>
-                <td style="text-align:right; font-size:0.8rem; color:${m.Status === 'Active' ? 'var(--accent)' : 'var(--danger)'}">${m.Status}</td>
-            </tr>`;
-        });
-        document.getElementById('memberListBody').innerHTML = html;
-    }
-
-    async function registerMember() {
-        const name = document.getElementById('mem_name').value;
-        if(!name) return alert("ใส่ชื่อด้วยครับ");
-        const btn = document.getElementById('btn-reg');
-        btn.disabled = true; btn.innerText = "กำลังบันทึก...";
-        
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value }) });
-        
-        document.getElementById('mem_name').value = "";
-        btn.disabled = false; btn.innerText = "+ เพิ่มเข้าก๊วน";
-        loadAllData();
-    }
-
-    // --- Page 2: Match ---
-    function updateDropdowns() {
-        const selects = document.querySelectorAll('.p-select');
-        const activeMembers = allDataMemory.filter(m => m.Status === "Active");
-        let options = '<option value="">- เลือก -</option>';
-        activeMembers.forEach(m => {
-            options += `<option value="${m.Name}">${m.Name} — [${m.Class}]</option>`;
-        });
-        
-        selects.forEach(s => {
-            const currentVal = s.value;
-            s.innerHTML = options;
-            s.value = currentVal;
-        });
-
-        // Dropdown หน้าสถานะ
-        const statusSelect = document.getElementById('status_name');
-        let allOptions = '<option value="">- เลือกชื่อผู้เล่น -</option>';
-        allDataMemory.forEach(m => { if(m.Name) allOptions += `<option value="${m.Name}">${m.Name} — [${m.Class}] (${m.Status})</option>`; });
-        statusSelect.innerHTML = allOptions;
-    }
-
+    // --- Match Logic ---
     function addNewMatchBox(shouldScroll = false) {
         gameCount++;
         const container = document.getElementById('matchContainer');
@@ -245,6 +180,7 @@
                 <button class="btn-choice" onclick="setBoxWin(this, 'Team B')">ทีม B ชนะ</button>
             </div>
             <button class="btn-main" onclick="saveMatchBox(${gameCount})">บันทึก</button>
+            <button class="btn-edit" onclick="editMatchBox(${gameCount})">✎ แก้ไข</button>
         `;
         container.appendChild(box);
         updateDropdowns();
@@ -260,10 +196,10 @@
     async function saveMatchBox(id) {
         const box = document.getElementById(`match-box-${id}`);
         const winner = box.querySelector('.btn-group').dataset.winner;
-        if (!winner || !box.querySelector('[data-role="p1a"]').value) return alert("เลือกคนและทีมชนะก่อนครับ");
+        if (!winner || !box.querySelector('[data-role="p1a"]').value) return alert("ข้อมูลไม่ครบ!");
         
         const btnSave = box.querySelector('.btn-main');
-        btnSave.disabled = true; btnSave.innerText = "กำลังส่ง...";
+        btnSave.disabled = true; btnSave.innerText = "กำลังบันทึก...";
 
         const data = { 
             teamA_p1: box.querySelector('[data-role="p1a"]').value, teamA_p2: box.querySelector('[data-role="p2a"]').value, 
@@ -271,49 +207,87 @@
             winner: winner 
         };
 
-        fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) })
-        .then(() => {
-            btnSave.innerText = "สำเร็จ ✓";
-            btnSave.classList.add('saved');
-            loadAllData();
-        });
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        btnSave.innerText = "สำเร็จ ✓"; btnSave.classList.add('saved');
+        box.querySelector('.btn-edit').style.display = 'block';
+        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
+        loadAllData();
     }
 
-    // --- Page 3: Full Stats ---
+    function editMatchBox(id) {
+        const box = document.getElementById(`match-box-${id}`);
+        box.querySelector('.btn-main').disabled = false;
+        box.querySelector('.btn-main').innerText = "บันทึก";
+        box.querySelector('.btn-main').classList.remove('saved');
+        box.querySelector('.btn-edit').style.display = 'none';
+        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
+    }
+
+    function updateDropdowns() {
+        const activeMembers = allDataMemory.filter(m => m.Status === "Active");
+        let options = '<option value="">- เลือก -</option>';
+        activeMembers.forEach(m => { options += `<option value="${m.Name}">${m.Name} — [${m.Class}]</option>`; });
+        document.querySelectorAll('.p-select').forEach(s => { 
+            const val = s.value; 
+            if(!s.disabled) { s.innerHTML = options; s.value = val; } 
+        });
+        
+        const statusSelect = document.getElementById('status_name');
+        let allOptions = '<option value="">- เลือกชื่อผู้เล่น -</option>';
+        allDataMemory.forEach(m => { if(m.Name) allOptions += `<option value="${m.Name}">${m.Name} — [${m.Class}] (${m.Status})</option>`; });
+        statusSelect.innerHTML = allOptions;
+    }
+
+    // --- Common Functions ---
+    function renderMemberList() {
+        let html = "";
+        allDataMemory.slice().reverse().forEach(m => {
+            if(!m.Name) return;
+            html += `<tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:10px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
+                <td class="${getTxtClass(m.Class)}" style="text-align:center;">${m.Class}</td>
+                <td style="text-align:right; font-size:0.8rem; color:${m.Status === 'Active' ? 'var(--accent)' : 'var(--danger)'}">${m.Status}</td>
+            </tr>`;
+        });
+        document.getElementById('memberListBody').innerHTML = html;
+    }
+
+    async function registerMember() {
+        const name = document.getElementById('mem_name').value;
+        if(!name) return alert("ใส่ชื่อด้วย");
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value }) });
+        document.getElementById('mem_name').value = "";
+        loadAllData();
+    }
+
     function renderStatsTable() {
-        const container = document.getElementById('fullStatsList');
         let sorted = [...allDataMemory].sort((a, b) => (b.TotalPlayed || 0) - (a.TotalPlayed || 0));
         let html = `<div class="stats-table-container"><table class="stats-table">
             <thead><tr><th>ชื่อ</th><th>ระดับ</th><th>เล่น</th><th>ช/พ</th><th>% ชนะ</th></tr></thead><tbody>`;
         sorted.forEach(m => {
             if(!m.Name) return;
-            html += `<tr>
-                <td><b>${m.Name}</b><br><small style="color:${m.Status === 'Active'?'#43b581':'#f04747'}">${m.Status}</small></td>
-                <td class="${getTxtClass(m.Class)}">${m.Class}</td>
-                <td>${m.TotalPlayed}</td>
+            html += `<tr><td><b>${m.Name}</b><br><small style="color:${m.Status === 'Active'?'#43b581':'#f04747'}">${m.Status}</small></td>
+                <td class="${getTxtClass(m.Class)}">${m.Class}</td><td>${m.TotalPlayed}</td>
                 <td><span style="color:#43b581">${m.Win}</span>/<span style="color:#f04747">${m.Loss}</span></td>
-                <td><b>${(m.WinRate * 100 || 0).toFixed(0)}%</b></td>
-            </tr>`;
+                <td><b>${(m.WinRate * 100 || 0).toFixed(0)}%</b></td></tr>`;
         });
-        html += `</tbody></table></div>`;
-        container.innerHTML = html;
+        document.getElementById('fullStatsList').innerHTML = html + `</tbody></table></div>`;
     }
 
     async function updateStatus(action) {
         const name = document.getElementById('status_name').value;
-        if (!name) return alert("เลือกคนก่อนครับ");
+        if (!name) return alert("เลือกชื่อ");
         await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: action, name: name }) });
         loadAllData();
     }
 
-    // --- Modal Stats ---
     function openStats() { document.getElementById('statsModal').style.display = "block"; renderMiniStats(); }
     function closeStats() { document.getElementById('statsModal').style.display = "none"; }
     function renderMiniStats() {
         let sorted = [...allDataMemory].sort((a, b) => (b.TotalPlayed || 0) - (a.TotalPlayed || 0));
         let html = "";
         sorted.forEach(m => { if(m.Name) html += `<div class="modal-row"><b>${m.Name}</b> <span class="${getTxtClass(m.Class)}">${m.Class}</span> <span>${m.TotalPlayed} เกม</span></div>`; });
-        document.getElementById('miniStatsList').innerHTML = html || "ยังไม่มีข้อมูล";
+        document.getElementById('miniStatsList').innerHTML = html;
     }
 
     window.onload = loadAllData;
