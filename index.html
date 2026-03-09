@@ -9,8 +9,8 @@
         :root {
             --bg-body: #1e2124; --bg-card: #2f3136; --text-main: #ffffff;
             --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b; --warning: #faa61a;
-            /* Class Colors */
-            --cls-p: #eb459e; --cls-s: #ed4245; --cls-n: #e67e22; --cls-bg: #3498db; --cls-bb: #43b581;
+            /* Class Font Colors */
+            --cls-p: #ff66b2; --cls-s: #ff4d4d; --cls-n: #ffaa00; --cls-bg: #33ccff; --cls-bb: #44ffaa;
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
         .container { padding: 20px; max-width: 450px; margin: auto; }
@@ -22,15 +22,12 @@
         .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
         .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
         
-        /* สไตล์ Badge ระดับฝีมือ */
-        .class-badge {
-            display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; color: white; text-align: center; min-width: 35px;
-        }
-        .badge-p { background-color: var(--cls-p); }
-        .badge-s { background-color: var(--cls-s); }
-        .badge-n { background-color: var(--cls-n); }
-        .badge-bg { background-color: var(--cls-bg); }
-        .badge-bb { background-color: var(--cls-bb); }
+        /* Class Color Logic */
+        .txt-p { color: var(--cls-p); font-weight: bold; }
+        .txt-s { color: var(--cls-s); font-weight: bold; }
+        .txt-n { color: var(--cls-n); font-weight: bold; }
+        .txt-bg { color: var(--cls-bg); font-weight: bold; }
+        .txt-bb { color: var(--cls-bb); font-weight: bold; }
 
         select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         select:disabled { opacity: 0.6; background: #202225; }
@@ -50,13 +47,10 @@
         /* Modal สถิติย่อ */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
         .modal-content { background: var(--bg-card); margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 420px; max-height: 80vh; overflow-y: auto; box-sizing: border-box; }
-        .stat-header { display: grid; grid-template-columns: 2fr 1fr 1.5fr; padding-bottom: 10px; border-bottom: 2px solid var(--border); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; }
-        .stat-row { display: grid; grid-template-columns: 2fr 1fr 1.5fr; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .stat-name { font-weight: 500; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .stat-header { display: grid; grid-template-columns: 2fr 0.8fr 1.5fr; padding-bottom: 10px; border-bottom: 2px solid var(--border); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; }
+        .stat-row { display: grid; grid-template-columns: 2fr 0.8fr 1.5fr; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .stat-total { font-size: 1.2rem; font-weight: 600; color: #fff; text-align: center; }
-        .stat-detail { font-size: 0.75rem; color: var(--text-dim); text-align: right; }
-        .close-btn { float: right; font-size: 28px; cursor: pointer; color: var(--text-dim); line-height: 20px; }
-
+        .close-btn { float: right; font-size: 28px; cursor: pointer; color: var(--text-dim); }
         .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer; font-weight: 600; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
@@ -69,13 +63,13 @@
 <div id="statsModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeStats()">&times;</span>
-        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติสมาชิก</h3>
+        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติเรียงตามเกมที่เล่น</h3>
         <div class="stat-header">
             <div>ชื่อ</div>
             <div style="text-align:center;">ระดับ</div>
             <div style="text-align:right;">เกม [ช/พ]</div>
         </div>
-        <div id="miniStatsList">กำลังโหลด...</div>
+        <div id="miniStatsList"></div>
     </div>
 </div>
 
@@ -84,9 +78,12 @@
         <h2>👥 ลงทะเบียนเข้าก๊วน</h2>
         <div class="card">
             <input type="text" id="mem_name" placeholder="ชื่อเล่น">
-            <select id="mem_class">
-                <option value="BB">BB</option><option value="BB+">BB+</option><option value="BG">BG</option><option value="BG+">BG+</option>
-                <option value="N">N</option><option value="N+">N+</option><option value="S">S</option><option value="S+">S+</option><option value="P">P</option>
+            <select id="mem_class" onchange="this.className = getTxtClass(this.value)">
+                <option value="BB" class="txt-bb">BB</option><option value="BB+" class="txt-bb">BB+</option>
+                <option value="BG" class="txt-bg">BG</option><option value="BG+" class="txt-bg">BG+</option>
+                <option value="N" class="txt-n">N</option><option value="N+" class="txt-n">N+</option>
+                <option value="S" class="txt-s">S</option><option value="S+" class="txt-s">S+</option>
+                <option value="P" class="txt-p">P</option>
             </select>
             <input type="text" id="mem_note" placeholder="หมายเหตุ">
             <button class="btn-main" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
@@ -99,25 +96,15 @@
     </div>
 
     <div id="page2" class="page">
-        <h2>
-            🏸 จดผลการแข่ง
-            <button class="btn-peek" onclick="openStats()">📊 สถิติย่อ</button>
-        </h2>
+        <h2>🏸 จดผลการแข่ง <button class="btn-peek" onclick="openStats()">📊 สถิติย่อ</button></h2>
         <div id="matchContainer"></div>
         <button class="btn-main btn-add-match" onclick="addNewMatchBox(true)">+ เพิ่มเกมถัดไป</button>
     </div>
 
-    <div id="page3" class="page">
-        <h2>📊 สถิติรวมทั้งหมด</h2>
-        <div id="fullStatsList"></div>
-    </div>
-
+    <div id="page3" class="page"><h2>📊 สถิติรวม</h2><div id="fullStatsList"></div></div>
     <div id="page4" class="page">
         <h2>🚪 เช็กเอาท์</h2>
-        <div class="card">
-            <select id="out_name" class="player-list"></select>
-            <button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button>
-        </div>
+        <div class="card"><select id="out_name" class="player-list"></select><button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button></div>
     </div>
 </div>
 
@@ -143,17 +130,17 @@
         if(num === 2) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
-    // ฟังก์ชันช่วยเลือกสี Badge
-    function getClassBadge(cls) {
+    function getTxtClass(cls) {
+        if(!cls) return "";
         let type = 'bb';
         if(cls.includes('P')) type = 'p';
         else if(cls.includes('S')) type = 's';
         else if(cls.includes('N')) type = 'n';
         else if(cls.includes('BG')) type = 'bg';
-        return `<span class="class-badge badge-${type}">${cls}</span>`;
+        return `txt-${type}`;
     }
 
-    // --- MINI STATS ---
+    // --- MINI STATS (Sorted by TotalPlayed) ---
     function openStats() {
         document.getElementById('statsModal').style.display = "block";
         renderMiniStats();
@@ -162,15 +149,17 @@
 
     function renderMiniStats() {
         const list = document.getElementById('miniStatsList');
+        // เรียงลำดับตามเกมที่เล่นมากไปน้อย
+        let sorted = [...allDataMemory].sort((a, b) => (b.TotalPlayed || 0) - (a.TotalPlayed || 0));
         let html = "";
-        allDataMemory.forEach(m => {
+        sorted.forEach(m => {
             if(!m.Name) return;
             html += `<div class="stat-row">
                 <div class="stat-name">${m.Name}</div>
-                <div style="text-align:center;">${getClassBadge(m.Class)}</div>
-                <div class="stat-detail">
+                <div style="text-align:center;" class="${getTxtClass(m.Class)}">${m.Class}</div>
+                <div style="text-align:right;">
                     <span class="stat-total">${m.TotalPlayed}</span> 
-                    <span style="color:var(--text-dim)">[${m.Win}/${m.Loss}]</span>
+                    <span style="color:var(--text-dim); font-size:0.75rem;">[${m.Win}/${m.Loss}]</span>
                 </div>
             </div>`;
         });
@@ -214,10 +203,11 @@
         if(shouldScroll) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
+    // Dropdown แสดงระดับหลังชื่อ
     function getMemberOptions() {
-        let options = '<option value="">- เลือก -</option>';
+        let options = '<option value="">- เลือกผู้เล่น -</option>';
         allDataMemory.filter(m => m.Status === "Active").forEach(m => {
-            options += `<option value="${m.Name}">${m.Name}</option>`;
+            options += `<option value="${m.Name}">${m.Name} &nbsp;&nbsp;&nbsp; [${m.Class}]</option>`;
         });
         return options;
     }
@@ -240,8 +230,7 @@
         const data = { teamA_p1: p1a, teamA_p2: box.querySelector('[data-role="p2a"]').value, teamB_p1: p1b, teamB_p2: box.querySelector('[data-role="p2b"]').value, winner: winner };
         try {
             await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            btnSave.innerText = "บันทึกแล้ว ✓";
-            btnSave.classList.add('saved');
+            btnSave.innerText = "บันทึกแล้ว ✓"; btnSave.classList.add('saved');
             box.querySelector('.btn-edit').style.display = 'block';
             box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
             const res = await fetch(WEB_APP_URL);
@@ -267,7 +256,7 @@
             if(!m.Name) return;
             html += `<tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:12px 5px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
-                <td style="text-align:center;">${getClassBadge(m.Class)}</td>
+                <td style="text-align:center;" class="${getTxtClass(m.Class)}">${m.Class}</td>
                 <td style="text-align:right;"><small style="color:${m.Status === 'Active' ? 'var(--accent)' : 'var(--text-dim)'}">${m.Status}</small></td>
             </tr>`;
         });
@@ -291,13 +280,10 @@
             if(!m.Name) return;
             html += `<div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span><b>${m.Name}</b> ${getClassBadge(m.Class)}</span>
+                    <span><b>${m.Name}</b> <span class="${getTxtClass(m.Class)}">[${m.Class}]</span></span>
                     <span style="color:var(--accent); font-weight:bold;">${(m.WinRate*100 || 0).toFixed(0)}%</span>
                 </div>
-                <div class="sub-text" style="margin-top:10px; color:#fff; font-size:0.9rem;">
-                    เล่น ${m.TotalPlayed} | ชนะ ${m.Win} | แพ้ ${m.Loss}
-                </div>
-                <div style="font-size:0.75rem; color:var(--text-dim); margin-top:5px;">🤝 คู่หูบ่อย: ${m.AllPartners || '-'}</div>
+                <div class="sub-text" style="margin-top:10px; color:#fff; font-size:0.9rem;">เล่น ${m.TotalPlayed} | ชนะ ${m.Win} | แพ้ ${m.Loss}</div>
             </div>`;
         });
         container.innerHTML = html;
@@ -309,7 +295,7 @@
         const select = document.getElementById('out_name');
         select.innerHTML = '<option value="">- เลือกชื่อ -</option>';
         allDataMemory.filter(m => m.Status === "Active").forEach(m => {
-            select.innerHTML += `<option value="${m.Name}">${m.Name}</option>`;
+            select.innerHTML += `<option value="${m.Name}">${m.Name} [${m.Class}]</option>`;
         });
     }
 </script>
