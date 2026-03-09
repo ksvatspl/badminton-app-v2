@@ -9,6 +9,8 @@
         :root {
             --bg-body: #1e2124; --bg-card: #2f3136; --text-main: #ffffff;
             --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b; --warning: #faa61a;
+            /* Class Colors */
+            --cls-p: #eb459e; --cls-s: #ed4245; --cls-n: #e67e22; --cls-bg: #3498db; --cls-bb: #43b581;
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
         .container { padding: 20px; max-width: 450px; margin: auto; }
@@ -20,6 +22,16 @@
         .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
         .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
         
+        /* สไตล์ Badge ระดับฝีมือ */
+        .class-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; color: white; text-align: center; min-width: 35px;
+        }
+        .badge-p { background-color: var(--cls-p); }
+        .badge-s { background-color: var(--cls-s); }
+        .badge-n { background-color: var(--cls-n); }
+        .badge-bg { background-color: var(--cls-bg); }
+        .badge-bb { background-color: var(--cls-bb); }
+
         select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         select:disabled { opacity: 0.6; background: #202225; }
         
@@ -35,20 +47,21 @@
         .btn-edit { background: var(--warning); margin-top: 10px; padding: 8px; font-size: 0.8rem; }
         .btn-add-match { background: transparent; border: 2px dashed var(--border); color: var(--text-dim); margin-top: 10px; }
         
-        /* Modal Style สำหรับสถิติย่อ */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-        .modal-content { background: var(--bg-card); margin: 15% auto; padding: 20px; border-radius: 15px; width: 85%; max-width: 400px; max-height: 70vh; overflow-y: auto; }
-        .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .stat-name { font-weight: bold; }
-        .stat-val { color: var(--accent); }
-        .close-btn { float: right; font-size: 24px; cursor: pointer; color: var(--text-dim); }
+        /* Modal สถิติย่อ */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
+        .modal-content { background: var(--bg-card); margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 420px; max-height: 80vh; overflow-y: auto; box-sizing: border-box; }
+        .stat-header { display: grid; grid-template-columns: 2fr 1fr 1.5fr; padding-bottom: 10px; border-bottom: 2px solid var(--border); font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; }
+        .stat-row { display: grid; grid-template-columns: 2fr 1fr 1.5fr; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .stat-name { font-weight: 500; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .stat-total { font-size: 1.2rem; font-weight: 600; color: #fff; text-align: center; }
+        .stat-detail { font-size: 0.75rem; color: var(--text-dim); text-align: right; }
+        .close-btn { float: right; font-size: 28px; cursor: pointer; color: var(--text-dim); line-height: 20px; }
 
-        .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 5px 15px; font-size: 0.8rem; cursor: pointer; }
+        .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 8px 15px; font-size: 0.85rem; cursor: pointer; font-weight: 600; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .sub-text { font-size: 0.75rem; color: var(--text-dim); display: block; }
     </style>
 </head>
 <body>
@@ -56,7 +69,12 @@
 <div id="statsModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeStats()">&times;</span>
-        <h3 style="margin-top:0;">📊 สถิติสมาชิกย่อ</h3>
+        <h3 style="margin-top:0; color:var(--accent);">📊 สถิติสมาชิก</h3>
+        <div class="stat-header">
+            <div>ชื่อ</div>
+            <div style="text-align:center;">ระดับ</div>
+            <div style="text-align:right;">เกม [ช/พ]</div>
+        </div>
         <div id="miniStatsList">กำลังโหลด...</div>
     </div>
 </div>
@@ -74,12 +92,9 @@
             <button class="btn-main" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
         </div>
         <div class="card" style="padding: 10px;">
-            <div style="overflow-x:auto;">
-                <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr style="text-align:left; color:var(--text-dim); font-size:0.8rem;"><th>ชื่อ</th><th>ระดับ</th><th>สถานะ</th></tr></thead>
-                    <tbody id="memberListBody"></tbody>
-                </table>
-            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <tbody id="memberListBody"></tbody>
+            </table>
         </div>
     </div>
 
@@ -125,14 +140,20 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('page' + num).classList.add('active');
         document.querySelectorAll('.nav-item')[num-1].classList.add('active');
-        
-        // ถ้ากลับมาหน้าจดผล ให้ไถลงไปข้างล่างสุด
-        if(num === 2) {
-            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
-        }
+        if(num === 2) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
-    // --- MINI STATS MODAL ---
+    // ฟังก์ชันช่วยเลือกสี Badge
+    function getClassBadge(cls) {
+        let type = 'bb';
+        if(cls.includes('P')) type = 'p';
+        else if(cls.includes('S')) type = 's';
+        else if(cls.includes('N')) type = 'n';
+        else if(cls.includes('BG')) type = 'bg';
+        return `<span class="class-badge badge-${type}">${cls}</span>`;
+    }
+
+    // --- MINI STATS ---
     function openStats() {
         document.getElementById('statsModal').style.display = "block";
         renderMiniStats();
@@ -145,8 +166,12 @@
         allDataMemory.forEach(m => {
             if(!m.Name) return;
             html += `<div class="stat-row">
-                <span class="stat-name">${m.Name} <small>(${m.Class})</small></span>
-                <span class="stat-val">${m.TotalPlayed} [${m.Win}/${m.Loss}]</span>
+                <div class="stat-name">${m.Name}</div>
+                <div style="text-align:center;">${getClassBadge(m.Class)}</div>
+                <div class="stat-detail">
+                    <span class="stat-total">${m.TotalPlayed}</span> 
+                    <span style="color:var(--text-dim)">[${m.Win}/${m.Loss}]</span>
+                </div>
             </div>`;
         });
         list.innerHTML = html || "ไม่มีข้อมูล";
@@ -186,9 +211,7 @@
             <button class="btn-main btn-edit" style="display:none;" onclick="editMatchBox(${gameCount})">✎ แก้ไข</button>
         `;
         container.appendChild(box);
-        if(shouldScroll) {
-            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
-        }
+        if(shouldScroll) setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 150);
     }
 
     function getMemberOptions() {
@@ -211,26 +234,16 @@
         const winner = box.querySelector('.btn-group').dataset.winner;
         const p1a = box.querySelector('[data-role="p1a"]').value;
         const p1b = box.querySelector('[data-role="p1b"]').value;
-        
         if (!winner || !p1a || !p1b) return alert("ข้อมูลไม่ครบ!");
-
         const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
-        btnSave.disabled = true; btnSave.innerText = "Saving...";
-
-        const data = {
-            teamA_p1: p1a, teamA_p2: box.querySelector('[data-role="p2a"]').value,
-            teamB_p1: p1b, teamB_p2: box.querySelector('[data-role="p2b"]').value,
-            winner: winner
-        };
-
+        btnSave.disabled = true; btnSave.innerText = "กำลังบันทึก...";
+        const data = { teamA_p1: p1a, teamA_p2: box.querySelector('[data-role="p2a"]').value, teamB_p1: p1b, teamB_p2: box.querySelector('[data-role="p2b"]').value, winner: winner };
         try {
             await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
             btnSave.innerText = "บันทึกแล้ว ✓";
             btnSave.classList.add('saved');
             box.querySelector('.btn-edit').style.display = 'block';
             box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
-            
-            // อัปเดตข้อมูล Memory ล่าสุด (เพื่อความแม่นยำของ Peek)
             const res = await fetch(WEB_APP_URL);
             allDataMemory = await res.json();
         } catch (e) { alert("Error!"); btnSave.disabled = false; }
@@ -238,9 +251,8 @@
 
     function editMatchBox(id) {
         const box = document.getElementById(`match-box-${id}`);
-        box.querySelector('.btn-main:not(.btn-edit)').classList.remove('saved');
-        box.querySelector('.btn-main:not(.btn-edit)').innerText = "บันทึกข้อมูล";
-        box.querySelector('.btn-main:not(.btn-edit)').disabled = false;
+        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
+        btnSave.classList.remove('saved'); btnSave.innerText = "บันทึกข้อมูล"; btnSave.disabled = false;
         box.querySelector('.btn-edit').style.display = 'none';
         box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
     }
@@ -254,9 +266,9 @@
         allDataMemory.slice().reverse().forEach(m => {
             if(!m.Name) return;
             html += `<tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:10px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
-                <td>${m.Class}</td>
-                <td><span class="status-pill ${m.Status === 'Active' ? 'active' : ''}">${m.Status}</span></td>
+                <td style="padding:12px 5px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
+                <td style="text-align:center;">${getClassBadge(m.Class)}</td>
+                <td style="text-align:right;"><small style="color:${m.Status === 'Active' ? 'var(--accent)' : 'var(--text-dim)'}">${m.Status}</small></td>
             </tr>`;
         });
         body.innerHTML = html;
@@ -265,10 +277,8 @@
     async function registerMember() {
         const name = document.getElementById('mem_name').value;
         if(!name) return alert("กรุณาใส่ชื่อ");
-        const payload = { type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value };
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        alert("สำเร็จ!");
-        location.reload(); 
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value }) });
+        alert("สำเร็จ!"); location.reload(); 
     }
 
     async function loadStats() {
@@ -280,12 +290,14 @@
         allDataMemory.forEach(m => {
             if(!m.Name) return;
             html += `<div class="card">
-                <div style="display:flex; justify-content:space-between;">
-                    <b>${m.Name} (${m.Class})</b>
-                    <span style="color:var(--accent)">WinRate: ${(m.WinRate*100 || 0).toFixed(0)}%</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><b>${m.Name}</b> ${getClassBadge(m.Class)}</span>
+                    <span style="color:var(--accent); font-weight:bold;">${(m.WinRate*100 || 0).toFixed(0)}%</span>
                 </div>
-                <div class="sub-text" style="margin-top:10px;">เล่นทั้งหมด: ${m.TotalPlayed} | ชนะ: ${m.Win} | แพ้: ${m.Loss}</div>
-                <div class="sub-text">🤝 คู่หูบ่อย: ${m.AllPartners || '-'}</div>
+                <div class="sub-text" style="margin-top:10px; color:#fff; font-size:0.9rem;">
+                    เล่น ${m.TotalPlayed} | ชนะ ${m.Win} | แพ้ ${m.Loss}
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-dim); margin-top:5px;">🤝 คู่หูบ่อย: ${m.AllPartners || '-'}</div>
             </div>`;
         });
         container.innerHTML = html;
