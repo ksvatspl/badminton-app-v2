@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-body: #1e2124; --bg-card: #2f3136; --text-main: #ffffff;
-            --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b;
+            --text-dim: #b9bbbe; --accent: #43b581; --danger: #f04747; --border: #40444b; --warning: #faa61a;
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Kanit', sans-serif; margin: 0; padding-bottom: 90px; }
         .container { padding: 20px; max-width: 450px; margin: auto; }
@@ -16,22 +16,26 @@
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         h2 { border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 20px; font-size: 1.4rem; }
-        .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.9rem; }
+        .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
+        .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
         select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
-        .vs-text { color: var(--danger); font-weight: bold; font-size: 1.2rem; }
+        select:disabled { opacity: 0.6; cursor: not-allowed; background: #202225; }
+        .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .vs-text { color: var(--danger); font-weight: bold; font-size: 1.2rem; text-align: center; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; }
+        .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .btn-choice.selected { border-color: var(--accent); background: rgba(67, 181, 129, 0.1); color: var(--accent); }
+        .btn-choice:disabled { opacity: 0.8; cursor: default; }
         .btn-main { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
-        .btn-main:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
+        .btn-main.saved { background: #4f545c; }
+        .btn-edit { background: var(--warning); margin-top: 10px; padding: 8px; font-size: 0.8rem; }
+        .btn-add-match { background: transparent; border: 2px dashed var(--border); color: var(--text-dim); margin-top: 10px; }
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: var(--text-dim); border-bottom: 1px solid var(--border); padding: 10px; font-size: 0.8rem; }
         td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
         .sub-text { font-size: 0.75rem; color: var(--text-dim); display: block; margin-top: 2px; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
         .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; background: #444; color: var(--text-dim); }
@@ -52,43 +56,23 @@
                 <option value="S">S</option><option value="S+">S+</option>
                 <option value="P">P</option>
             </select>
-            <input type="text" id="mem_note" placeholder="หมายเหตุ (เช่น เบอร์โทร, สังกัด)">
+            <input type="text" id="mem_note" placeholder="หมายเหตุ (เบอร์โทร/สังกัด)">
             <button class="btn-main" id="btn_reg" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
         </div>
-        
         <div class="card" style="padding: 10px;">
-            <h3 style="font-size: 1rem; padding: 10px 10px 0 10px; color: var(--text-dim);">รายชื่อสมาชิกล่าสุด</h3>
             <div class="table-wrapper">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>ชื่อ/โน้ต</th>
-                            <th>ระดับ</th>
-                            <th>สถานะ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="memberListBody">
-                        <tr><td colspan="3" style="text-align:center;">กำลังโหลดรายชื่อ...</td></tr>
-                    </tbody>
+                    <thead><tr><th>ชื่อ/โน้ต</th><th>ระดับ</th><th>สถานะ</th></tr></thead>
+                    <tbody id="memberListBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <div id="page2" class="page">
-        <h2>🏸 บันทึกผล</h2>
-        <div class="card">
-            <div class="match-grid">
-                <div><select id="p1a" class="player-list"></select><select id="p2a" class="player-list"></select></div>
-                <div class="vs-text">VS</div>
-                <div><select id="p1b" class="player-list"></select><select id="p2b" class="player-list"></select></div>
-            </div>
-            <div class="btn-group">
-                <button class="btn-choice" id="winA" onclick="setWin('Team A')">ทีม A ชนะ</button>
-                <button class="btn-choice" id="winB" onclick="setWin('Team B')">ทีม B ชนะ</button>
-            </div>
-            <button class="btn-main" id="btn_save" onclick="saveMatch()">บันทึกข้อมูล</button>
-        </div>
+        <h2>🏸 จดผลการแข่ง</h2>
+        <div id="matchContainer"></div>
+        <button class="btn-main btn-add-match" onclick="addNewMatchBox()">+ เพิ่มเกมถัดไป</button>
     </div>
 
     <div id="page3" class="page">
@@ -97,7 +81,6 @@
             <table><thead><tr><th>สมาชิก</th><th>ชนะ/เล่น</th><th>คู่/แข่ง</th></tr></thead><tbody id="statsBody"></tbody></table>
         </div>
     </div>
-
     <div id="page4" class="page">
         <h2>🚪 กลับบ้าน</h2>
         <div class="card">
@@ -109,15 +92,15 @@
 
 <nav class="bottom-nav">
     <div class="nav-item active" onclick="showPage(1); loadMemberList();">ลงชื่อ</div>
-    <div class="nav-item" onclick="showPage(2); fetchDropdowns();">จดผล</div>
+    <div class="nav-item" onclick="showPage(2); initMatchPage();">จดผล</div>
     <div class="nav-item" onclick="showPage(3); loadStats();">สถิติ</div>
     <div class="nav-item" onclick="showPage(4); fetchDropdowns();">กลับบ้าน</div>
 </nav>
 
 <script>
-    // *** สำคัญ: ตรวจสอบ URL นี้ให้เป็น URL ล่าสุดที่คุณ Deploy ***
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbD1kRA5jDrJJNr5nnqHIRcZzk9IjmHAXi9LqCl5urGyxM7HgxbviOYuUbnV9f-YEawA/exec";
-    let selectedWinner = "";
+    let gameCount = 0;
+    let activeMembers = [];
 
     window.onload = loadMemberList;
 
@@ -128,23 +111,110 @@
         document.querySelectorAll('.nav-item')[num-1].classList.add('active');
     }
 
-    function setWin(team) {
-        selectedWinner = team;
-        document.getElementById('winA').className = team === 'Team A' ? 'btn-choice selected' : 'btn-choice';
-        document.getElementById('winB').className = team === 'Team B' ? 'btn-choice selected' : 'btn-choice';
+    // --- LOGIC หน้าจดผลใหม่ ---
+    async function initMatchPage() {
+        const res = await fetch(WEB_APP_URL);
+        const data = await res.json();
+        activeMembers = data.filter(m => m.Status === "Active");
+        if(gameCount === 0) addNewMatchBox();
     }
 
-    async function sendData(payload, btnId) {
-        const btn = document.getElementById(btnId);
-        btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+    function addNewMatchBox() {
+        gameCount++;
+        const container = document.getElementById('matchContainer');
+        
+        // จำกัดแค่ 10 เกมล่าสุด
+        if (container.children.length >= 10) {
+            container.removeChild(container.firstChild);
+        }
+
+        const box = document.createElement('div');
+        box.className = 'card';
+        box.id = `match-box-${gameCount}`;
+        box.innerHTML = `
+            <div class="game-label">เกมที่ ${gameCount}</div>
+            <div class="match-grid">
+                <div>
+                    <select class="p-select" data-role="p1a">${getMemberOptions()}</select>
+                    <select class="p-select" data-role="p2a">${getMemberOptions()}</select>
+                </div>
+                <div class="vs-text">VS</div>
+                <div>
+                    <select class="p-select" data-role="p1b">${getMemberOptions()}</select>
+                    <select class="p-select" data-role="p2b">${getMemberOptions()}</select>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-choice" onclick="setBoxWin(this, 'Team A')">ทีม A ชนะ</button>
+                <button class="btn-choice" onclick="setBoxWin(this, 'Team B')">ทีม B ชนะ</button>
+            </div>
+            <button class="btn-main" onclick="saveMatchBox(${gameCount})">บันทึกข้อมูล</button>
+            <button class="btn-main btn-edit" style="display:none;" onclick="editMatchBox(${gameCount})">✎ แก้ไขข้อมูล</button>
+        `;
+        container.appendChild(box);
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function getMemberOptions() {
+        let options = '<option value="">- เลือกชื่อ -</option>';
+        activeMembers.forEach(m => options += `<option value="${m.Name}">${m.Name}</option>`);
+        return options;
+    }
+
+    function setBoxWin(btn, team) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.btn-choice').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        parent.dataset.winner = team;
+    }
+
+    async function saveMatchBox(id) {
+        const box = document.getElementById(`match-box-${id}`);
+        const winner = box.querySelector('.btn-group').dataset.winner;
+        const p1a = box.querySelector('[data-role="p1a"]').value;
+        const p1b = box.querySelector('[data-role="p1b"]').value;
+        
+        if (!winner || !p1a || !p1b) return alert("กรุณาเลือกผู้เล่นและทีมที่ชนะ");
+
+        const data = {
+            teamA_p1: p1a,
+            teamA_p2: box.querySelector('[data-role="p2a"]').value,
+            teamB_p1: p1b,
+            teamB_p2: box.querySelector('[data-role="p2b"]').value,
+            winner: winner
+        };
+
+        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
+        btnSave.disabled = true;
+        btnSave.innerText = "กำลังบันทึก...";
+
         try {
-            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("บันทึกสำเร็จ!");
-            if(btnId === 'btn_reg') loadMemberList();
-        } catch (e) { alert("Error: " + e); }
-        btn.disabled = false; btn.innerText = (btnId === 'btn_reg' ? "+ เพิ่มเข้าก๊วน" : "บันทึกข้อมูล");
+            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            
+            // เปลี่ยนสถานะเป็นบันทึกแล้ว
+            btnSave.innerText = "บันทึกแล้ว ✓";
+            btnSave.classList.add('saved');
+            box.querySelector('.btn-edit').style.display = 'block';
+            box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
+            alert(`เกมที่ ${id} บันทึกสำเร็จ!`);
+        } catch (e) {
+            alert("บันทึกไม่สำเร็จ");
+            btnSave.disabled = false;
+            btnSave.innerText = "บันทึกข้อมูล";
+        }
     }
 
+    function editMatchBox(id) {
+        const box = document.getElementById(`match-box-${id}`);
+        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
+        btnSave.disabled = false;
+        btnSave.innerText = "บันทึกข้อมูล";
+        btnSave.classList.remove('saved');
+        box.querySelector('.btn-edit').style.display = 'none';
+        box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
+    }
+
+    // --- LOGIC อื่นๆคงเดิม ---
     async function loadMemberList() {
         const body = document.getElementById('memberListBody');
         try {
@@ -155,38 +225,23 @@
             data.forEach(m => {
                 if(!m.Name) return;
                 const statusClass = m.Status === "Active" ? "active" : "";
-                html += `<tr>
-                    <td><b>${m.Name}</b><span class="sub-text">${m.Note || ''}</span></td>
-                    <td>${m.Class || '-'}</td>
-                    <td><span class="status-pill ${statusClass}">${m.Status}</span></td>
-                </tr>`;
+                html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Note || ''}</span></td><td>${m.Class || '-'}</td><td><span class="status-pill ${statusClass}">${m.Status}</span></td></tr>`;
             });
             body.innerHTML = html || "<tr><td colspan='3'>ยังไม่มีรายชื่อ</td></tr>";
-        } catch (e) { body.innerHTML = "<tr><td colspan='3'>โหลดไม่สำเร็จ: " + e + "</td></tr>"; }
+        } catch (e) { body.innerHTML = "<tr><td colspan='3'>Error</td></tr>"; }
     }
 
     async function registerMember() {
         const name = document.getElementById('mem_name').value;
-        const note = document.getElementById('mem_note').value;
         if (!name) return alert("ใส่ชื่อด้วยครับ");
-        await sendData({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: note }, "btn_reg");
+        const btn = document.getElementById('btn_reg');
+        btn.disabled = true;
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value }) });
+        alert("เพิ่มสำเร็จ!");
         document.getElementById('mem_name').value = "";
         document.getElementById('mem_note').value = "";
-    }
-
-    async function saveMatch() {
-        const data = { teamA_p1: document.getElementById('p1a').value, teamA_p2: document.getElementById('p2a').value, teamB_p1: document.getElementById('p1b').value, teamB_p2: document.getElementById('p2b').value, winner: selectedWinner };
-        if (!data.winner || !data.teamA_p1 || !data.teamB_p1) return alert("ข้อมูลไม่ครบ");
-        await sendData(data, "btn_save");
-    }
-
-    async function fetchDropdowns() {
-        const res = await fetch(WEB_APP_URL);
-        const data = await res.json();
-        document.querySelectorAll('.player-list').forEach(s => {
-            s.innerHTML = '<option value="">- เลือกชื่อ -</option>';
-            data.forEach(m => { if(m.Status === "Active") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`; });
-        });
+        btn.disabled = false;
+        loadMemberList();
     }
 
     async function loadStats() {
@@ -200,6 +255,15 @@
             html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100 || 0).toFixed(0)}%</span></td><td>${m.Win || 0}/${m.TotalPlayed || 0}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
         });
         body.innerHTML = html;
+    }
+
+    async function fetchDropdowns() {
+        const res = await fetch(WEB_APP_URL);
+        const data = await res.json();
+        document.querySelectorAll('.player-list').forEach(s => {
+            s.innerHTML = '<option value="">- เลือกชื่อ -</option>';
+            data.forEach(m => { if(m.Status === "Active") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`; });
+        });
     }
 </script>
 </body>
