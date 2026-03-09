@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Hub</title>
+    <title>Badminton Hub Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,54 +15,68 @@
         .page { display: none; animation: fadeIn 0.2s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        h2 { border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 20px; font-size: 1.4rem; }
+        
+        h2 { border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 20px; font-size: 1.4rem; display: flex; justify-content: space-between; align-items: center; }
         .card { background: var(--bg-card); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; }
         .game-label { position: absolute; top: -10px; right: 20px; background: var(--accent); color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
+        
         select, input { width: 100%; padding: 12px; margin-bottom: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        select:disabled { opacity: 0.6; cursor: not-allowed; background: #202225; }
+        select:disabled { opacity: 0.6; background: #202225; }
+        
         .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 15px; }
         .vs-text { color: var(--danger); font-weight: bold; font-size: 1.2rem; text-align: center; }
+        
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
         .btn-choice { flex: 1; padding: 12px; background: #36393f; border: 1px solid var(--border); color: white; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .btn-choice.selected { border-color: var(--accent); background: rgba(67, 181, 129, 0.1); color: var(--accent); }
-        .btn-choice:disabled { opacity: 0.8; cursor: default; }
-        .btn-main { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        
+        .btn-main { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
         .btn-main.saved { background: #4f545c; }
         .btn-edit { background: var(--warning); margin-top: 10px; padding: 8px; font-size: 0.8rem; }
         .btn-add-match { background: transparent; border: 2px dashed var(--border); color: var(--text-dim); margin-top: 10px; }
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--text-dim); border-bottom: 1px solid var(--border); padding: 10px; font-size: 0.8rem; }
-        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
-        .sub-text { font-size: 0.75rem; color: var(--text-dim); display: block; margin-top: 2px; }
+        
+        /* Modal Style สำหรับสถิติย่อ */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: var(--bg-card); margin: 15% auto; padding: 20px; border-radius: 15px; width: 85%; max-width: 400px; max-height: 70vh; overflow-y: auto; }
+        .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .stat-name { font-weight: bold; }
+        .stat-val { color: var(--accent); }
+        .close-btn { float: right; font-size: 24px; cursor: pointer; color: var(--text-dim); }
+
+        .btn-peek { background: #5865f2; color: white; border: none; border-radius: 8px; padding: 5px 15px; font-size: 0.8rem; cursor: pointer; }
+
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202225; display: flex; border-top: 1px solid var(--border); padding: 10px 0; z-index: 100; }
         .nav-item { flex: 1; text-align: center; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
-        .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; background: #444; color: var(--text-dim); }
-        .status-pill.active { background: rgba(67, 181, 129, 0.2); color: var(--accent); }
+        .sub-text { font-size: 0.75rem; color: var(--text-dim); display: block; }
     </style>
 </head>
 <body>
+
+<div id="statsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeStats()">&times;</span>
+        <h3 style="margin-top:0;">📊 สถิติสมาชิกย่อ</h3>
+        <div id="miniStatsList">กำลังโหลด...</div>
+    </div>
+</div>
 
 <div class="container">
     <div id="page1" class="page active">
         <h2>👥 ลงทะเบียนเข้าก๊วน</h2>
         <div class="card">
-            <input type="text" id="mem_name" placeholder="ชื่อเล่น/ชื่อที่ใช้เรียก">
+            <input type="text" id="mem_name" placeholder="ชื่อเล่น">
             <select id="mem_class">
-                <option value="BB">BB</option><option value="BB+">BB+</option>
-                <option value="BG">BG</option><option value="BG+">BG+</option>
-                <option value="N">N</option><option value="N+">N+</option>
-                <option value="S">S</option><option value="S+">S+</option>
-                <option value="P">P</option>
+                <option value="BB">BB</option><option value="BB+">BB+</option><option value="BG">BG</option><option value="BG+">BG+</option>
+                <option value="N">N</option><option value="N+">N+</option><option value="S">S</option><option value="S+">S+</option><option value="P">P</option>
             </select>
-            <input type="text" id="mem_note" placeholder="หมายเหตุ (เบอร์โทร/สังกัด)">
-            <button class="btn-main" id="btn_reg" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
+            <input type="text" id="mem_note" placeholder="หมายเหตุ">
+            <button class="btn-main" onclick="registerMember()">+ เพิ่มเข้าก๊วน</button>
         </div>
         <div class="card" style="padding: 10px;">
-            <div class="table-wrapper">
-                <table>
-                    <thead><tr><th>ชื่อ/โน้ต</th><th>ระดับ</th><th>สถานะ</th></tr></thead>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr style="text-align:left; color:var(--text-dim); font-size:0.8rem;"><th>ชื่อ</th><th>ระดับ</th><th>สถานะ</th></tr></thead>
                     <tbody id="memberListBody"></tbody>
                 </table>
             </div>
@@ -70,22 +84,24 @@
     </div>
 
     <div id="page2" class="page">
-        <h2>🏸 จดผลการแข่ง</h2>
+        <h2>
+            🏸 จดผลการแข่ง
+            <button class="btn-peek" onclick="openStats()">📊 สถิติย่อ</button>
+        </h2>
         <div id="matchContainer"></div>
-        <button class="btn-main btn-add-match" onclick="addNewMatchBox()">+ เพิ่มเกมถัดไป</button>
+        <button class="btn-main btn-add-match" onclick="addNewMatchBox(true)">+ เพิ่มเกมถัดไป</button>
     </div>
 
     <div id="page3" class="page">
-        <h2>📊 สถิติรวม</h2>
-        <div class="card table-wrapper">
-            <table><thead><tr><th>สมาชิก</th><th>ชนะ/เล่น</th><th>คู่/แข่ง</th></tr></thead><tbody id="statsBody"></tbody></table>
-        </div>
+        <h2>📊 สถิติรวมทั้งหมด</h2>
+        <div id="fullStatsList"></div>
     </div>
+
     <div id="page4" class="page">
-        <h2>🚪 กลับบ้าน</h2>
+        <h2>🚪 เช็กเอาท์</h2>
         <div class="card">
             <select id="out_name" class="player-list"></select>
-            <button class="btn-main" id="btn_out" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button>
+            <button class="btn-main" style="background: var(--danger);" onclick="checkOut()">บันทึกการกลับ</button>
         </div>
     </div>
 </div>
@@ -100,7 +116,7 @@
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbD1kRA5jDrJJNr5nnqHIRcZzk9IjmHAXi9LqCl5urGyxM7HgxbviOYuUbnV9f-YEawA/exec";
     let gameCount = 0;
-    let activeMembers = [];
+    let allDataMemory = []; 
 
     window.onload = loadMemberList;
 
@@ -109,25 +125,43 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('page' + num).classList.add('active');
         document.querySelectorAll('.nav-item')[num-1].classList.add('active');
+        
+        // ถ้ากลับมาหน้าจดผล ให้ไถลงไปข้างล่างสุด
+        if(num === 2) {
+            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+        }
     }
 
-    // --- LOGIC หน้าจดผลใหม่ ---
+    // --- MINI STATS MODAL ---
+    function openStats() {
+        document.getElementById('statsModal').style.display = "block";
+        renderMiniStats();
+    }
+    function closeStats() { document.getElementById('statsModal').style.display = "none"; }
+
+    function renderMiniStats() {
+        const list = document.getElementById('miniStatsList');
+        let html = "";
+        allDataMemory.forEach(m => {
+            if(!m.Name) return;
+            html += `<div class="stat-row">
+                <span class="stat-name">${m.Name} <small>(${m.Class})</small></span>
+                <span class="stat-val">${m.TotalPlayed} [${m.Win}/${m.Loss}]</span>
+            </div>`;
+        });
+        list.innerHTML = html || "ไม่มีข้อมูล";
+    }
+
+    // --- MATCH LOGIC ---
     async function initMatchPage() {
         const res = await fetch(WEB_APP_URL);
-        const data = await res.json();
-        activeMembers = data.filter(m => m.Status === "Active");
+        allDataMemory = await res.json();
         if(gameCount === 0) addNewMatchBox();
     }
 
-    function addNewMatchBox() {
+    function addNewMatchBox(shouldScroll = false) {
         gameCount++;
         const container = document.getElementById('matchContainer');
-        
-        // จำกัดแค่ 10 เกมล่าสุด
-        if (container.children.length >= 10) {
-            container.removeChild(container.firstChild);
-        }
-
         const box = document.createElement('div');
         box.className = 'card';
         box.id = `match-box-${gameCount}`;
@@ -149,15 +183,19 @@
                 <button class="btn-choice" onclick="setBoxWin(this, 'Team B')">ทีม B ชนะ</button>
             </div>
             <button class="btn-main" onclick="saveMatchBox(${gameCount})">บันทึกข้อมูล</button>
-            <button class="btn-main btn-edit" style="display:none;" onclick="editMatchBox(${gameCount})">✎ แก้ไขข้อมูล</button>
+            <button class="btn-main btn-edit" style="display:none;" onclick="editMatchBox(${gameCount})">✎ แก้ไข</button>
         `;
         container.appendChild(box);
-        window.scrollTo(0, document.body.scrollHeight);
+        if(shouldScroll) {
+            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+        }
     }
 
     function getMemberOptions() {
-        let options = '<option value="">- เลือกชื่อ -</option>';
-        activeMembers.forEach(m => options += `<option value="${m.Name}">${m.Name}</option>`);
+        let options = '<option value="">- เลือก -</option>';
+        allDataMemory.filter(m => m.Status === "Active").forEach(m => {
+            options += `<option value="${m.Name}">${m.Name}</option>`;
+        });
         return options;
     }
 
@@ -174,95 +212,92 @@
         const p1a = box.querySelector('[data-role="p1a"]').value;
         const p1b = box.querySelector('[data-role="p1b"]').value;
         
-        if (!winner || !p1a || !p1b) return alert("กรุณาเลือกผู้เล่นและทีมที่ชนะ");
+        if (!winner || !p1a || !p1b) return alert("ข้อมูลไม่ครบ!");
+
+        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
+        btnSave.disabled = true; btnSave.innerText = "Saving...";
 
         const data = {
-            teamA_p1: p1a,
-            teamA_p2: box.querySelector('[data-role="p2a"]').value,
-            teamB_p1: p1b,
-            teamB_p2: box.querySelector('[data-role="p2b"]').value,
+            teamA_p1: p1a, teamA_p2: box.querySelector('[data-role="p2a"]').value,
+            teamB_p1: p1b, teamB_p2: box.querySelector('[data-role="p2b"]').value,
             winner: winner
         };
 
-        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
-        btnSave.disabled = true;
-        btnSave.innerText = "กำลังบันทึก...";
-
         try {
             await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            
-            // เปลี่ยนสถานะเป็นบันทึกแล้ว
             btnSave.innerText = "บันทึกแล้ว ✓";
             btnSave.classList.add('saved');
             box.querySelector('.btn-edit').style.display = 'block';
             box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = true);
-            alert(`เกมที่ ${id} บันทึกสำเร็จ!`);
-        } catch (e) {
-            alert("บันทึกไม่สำเร็จ");
-            btnSave.disabled = false;
-            btnSave.innerText = "บันทึกข้อมูล";
-        }
+            
+            // อัปเดตข้อมูล Memory ล่าสุด (เพื่อความแม่นยำของ Peek)
+            const res = await fetch(WEB_APP_URL);
+            allDataMemory = await res.json();
+        } catch (e) { alert("Error!"); btnSave.disabled = false; }
     }
 
     function editMatchBox(id) {
         const box = document.getElementById(`match-box-${id}`);
-        const btnSave = box.querySelector('.btn-main:not(.btn-edit)');
-        btnSave.disabled = false;
-        btnSave.innerText = "บันทึกข้อมูล";
-        btnSave.classList.remove('saved');
+        box.querySelector('.btn-main:not(.btn-edit)').classList.remove('saved');
+        box.querySelector('.btn-main:not(.btn-edit)').innerText = "บันทึกข้อมูล";
+        box.querySelector('.btn-main:not(.btn-edit)').disabled = false;
         box.querySelector('.btn-edit').style.display = 'none';
         box.querySelectorAll('select, .btn-choice').forEach(el => el.disabled = false);
     }
 
-    // --- LOGIC อื่นๆคงเดิม ---
+    // --- OTHER PAGES ---
     async function loadMemberList() {
         const body = document.getElementById('memberListBody');
-        try {
-            const res = await fetch(WEB_APP_URL);
-            let data = await res.json();
-            data.reverse();
-            let html = "";
-            data.forEach(m => {
-                if(!m.Name) return;
-                const statusClass = m.Status === "Active" ? "active" : "";
-                html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Note || ''}</span></td><td>${m.Class || '-'}</td><td><span class="status-pill ${statusClass}">${m.Status}</span></td></tr>`;
-            });
-            body.innerHTML = html || "<tr><td colspan='3'>ยังไม่มีรายชื่อ</td></tr>";
-        } catch (e) { body.innerHTML = "<tr><td colspan='3'>Error</td></tr>"; }
-    }
-
-    async function registerMember() {
-        const name = document.getElementById('mem_name').value;
-        if (!name) return alert("ใส่ชื่อด้วยครับ");
-        const btn = document.getElementById('btn_reg');
-        btn.disabled = true;
-        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value }) });
-        alert("เพิ่มสำเร็จ!");
-        document.getElementById('mem_name').value = "";
-        document.getElementById('mem_note').value = "";
-        btn.disabled = false;
-        loadMemberList();
-    }
-
-    async function loadStats() {
-        const body = document.getElementById('statsBody');
-        body.innerHTML = "<tr><td colspan='3'>กำลังโหลด...</td></tr>";
         const res = await fetch(WEB_APP_URL);
-        let data = await res.json();
+        allDataMemory = await res.json();
         let html = "";
-        data.forEach(m => {
+        allDataMemory.slice().reverse().forEach(m => {
             if(!m.Name) return;
-            html += `<tr><td><b>${m.Name}</b><span class="sub-text">${m.Class} | ${(m.WinRate*100 || 0).toFixed(0)}%</span></td><td>${m.Win || 0}/${m.TotalPlayed || 0}</td><td><span class="sub-text">🤝 ${m.AllPartners || '-'}</span><span class="sub-text">⚔️ ${m.AllOpponents || '-'}</span></td></tr>`;
+            html += `<tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:10px;"><b>${m.Name}</b><br><small style="color:var(--text-dim)">${m.Note || ''}</small></td>
+                <td>${m.Class}</td>
+                <td><span class="status-pill ${m.Status === 'Active' ? 'active' : ''}">${m.Status}</span></td>
+            </tr>`;
         });
         body.innerHTML = html;
     }
 
+    async function registerMember() {
+        const name = document.getElementById('mem_name').value;
+        if(!name) return alert("กรุณาใส่ชื่อ");
+        const payload = { type: "new_member", name: name, class: document.getElementById('mem_class').value, note: document.getElementById('mem_note').value };
+        await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        alert("สำเร็จ!");
+        location.reload(); 
+    }
+
+    async function loadStats() {
+        const container = document.getElementById('fullStatsList');
+        container.innerHTML = "กำลังโหลด...";
+        const res = await fetch(WEB_APP_URL);
+        allDataMemory = await res.json();
+        let html = "";
+        allDataMemory.forEach(m => {
+            if(!m.Name) return;
+            html += `<div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <b>${m.Name} (${m.Class})</b>
+                    <span style="color:var(--accent)">WinRate: ${(m.WinRate*100 || 0).toFixed(0)}%</span>
+                </div>
+                <div class="sub-text" style="margin-top:10px;">เล่นทั้งหมด: ${m.TotalPlayed} | ชนะ: ${m.Win} | แพ้: ${m.Loss}</div>
+                <div class="sub-text">🤝 คู่หูบ่อย: ${m.AllPartners || '-'}</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
     async function fetchDropdowns() {
         const res = await fetch(WEB_APP_URL);
-        const data = await res.json();
-        document.querySelectorAll('.player-list').forEach(s => {
-            s.innerHTML = '<option value="">- เลือกชื่อ -</option>';
-            data.forEach(m => { if(m.Status === "Active") s.innerHTML += `<option value="${m.Name}">${m.Name}</option>`; });
+        allDataMemory = await res.json();
+        const select = document.getElementById('out_name');
+        select.innerHTML = '<option value="">- เลือกชื่อ -</option>';
+        allDataMemory.filter(m => m.Status === "Active").forEach(m => {
+            select.innerHTML += `<option value="${m.Name}">${m.Name}</option>`;
         });
     }
 </script>
